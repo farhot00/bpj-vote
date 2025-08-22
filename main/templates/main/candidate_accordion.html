@@ -1,0 +1,68 @@
+{% load static %}
+{% load thumbnail %}
+<html lang="fa" dir="rtl">
+<head>
+    <link href="bootstrap.rtl.min.css" rel="stylesheet"  crossorigin="anonymous">
+</head>
+<body>
+<main>
+<div class="accordion  text-center justify-content-md-center" id="accordionCandidates">
+    {% for sa in associations %}
+  <div class="accordion-item">
+    <h2 class="accordion-header">
+      <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse{{ forloop.counter }}" aria-expanded="true" aria-controls="collapse{{ forloop.counter }}">
+          {{ sa.name }}
+      </button>
+    </h2>
+    <div id="collapse{{ forloop.counter }}" class="accordion-collapse collapse" data-bs-parent="#accordionCandidates">
+      <div class="accordion-body">
+      <h4 class="">انجمن علمی دانشجویی {{ sa.name }} | {{ sa.total_votes }} رای</h4>
+      <div class="row">
+           {% for candidate in sa.candidate_set.all %}
+
+                                            <div class="col-md-3 candidate-card">
+                                                                                            {% if candidate.election_photo %}
+                                                        {% thumbnail candidate.election_photo "200x200" as im %}
+                                                            <img class="rounded-circle img-thumbnail"
+                                                                 loading="lazy"
+                                                                 src="{{ im.url }}" width="{% widthratio im.x 2 1 %}"
+                                                                 height="{% widthratio im.y 2 1 %}"
+                                                                 alt="{{ candidate.first_name }} {{ candidate.last_name }}">
+                                                        {% endthumbnail %}
+{% elif candidate.personal_photo %}
+                                                {% thumbnail candidate.personal_photo "200x200" as im %}
+                                                            <img class="rounded-circle img-thumbnail"
+                                                                 loading="lazy"
+                                                                 src="{{ im.url }}" width="{% widthratio im.x 2 1 %}"
+                                                                 height="{% widthratio im.y 2 1 %}"
+                                                                 alt="{{ candidate.first_name }} {{ candidate.last_name }}">
+                                                        {% endthumbnail %}
+                                                                                            {% else %}
+                                                        <div class="bg-gray-400 ms-auto me-auto text-dark-blue rounded-circle img-thumbnail"
+                                                             style="width: 100px; height: 100px; display: flex; justify-content: center; align-items: center;  font-size: 24px; font-weight: bold; text-transform: uppercase;">
+{#                                                            {{ candidate.first_name|slice:":1" }} {{ candidate.last_name|slice:":1" }}#}
+                                                        <img loading="lazy" src="{% static 'img/person.svg' %}" alt="Person"  width="100%" height="100%">
+                                                        </div>
+                                                    {% endif %}
+                                        <p class="text-bolder text-dark">{{ candidate.first_name }} {{ candidate.last_name }}</p>
+                                        <p class="text-bolder text-dark">کد انتخاباتی {{ candidate.candidate_code}}</p>
+                                            <h5 class="text-bold text-black-50 m-0">{{ candidate.vote_count }} رای | {{ candidate.vote_percentage|floatformat:2 }}%</h5>
+                                            {% if candidate.one_year_plan_for_association %}
+                                        <a href="{{ candidate.one_year_plan_for_association.url }}" target="_blank"><p class="text-bolder text-dark">برنامه یکساله</p></a>
+                                            {% else %}
+                                                <p class="text-bolder text-dark">بدون برنامه یکساله</p>
+                                            {% endif %}
+                                    </div>
+                                        {% empty %}
+                                            <li>No candidates for this association.</li>
+                                        {% endfor %}
+              </div>
+    </div>
+      </div>
+  </div>
+
+    {% endfor %}
+</div>
+</main>
+</body>
+</html>

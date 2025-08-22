@@ -1,0 +1,51 @@
+{% load static %}
+
+
+<html lang="fa" dir="rtl" class="">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <link rel="icon" type="image/png" href="/static/favicons/favicon-48x48.png" sizes="48x48" />
+    <link rel="icon" type="image/svg+xml" href="/static/favicons/favicon.svg" />
+    <link rel="shortcut icon" href="/static/favicons/favicon.ico" />
+    <link rel="apple-touch-icon" sizes="180x180" href="/static/favicons/apple-touch-icon.png" />
+    <link rel="manifest" href="/static/favicons/site.webmanifest" />
+    <title>
+        سامانه انتخابات آنلاین انجمن های علمی علوم و تحقیقات{% if title %}-{{ title }}{% elif form_title %}-{{ form_title }}{% endif %}
+    </title>
+    <link id="pagestyle" href="{% static 'dashboard/css/material-dashboard.css' %}" rel="stylesheet"/>
+    <link id="pagestyle" href="{% static 'css/custom.css' %}" rel="stylesheet"/>
+</head>
+<body class="bg-gray-200">
+{% block body %}{% endblock %}
+
+<main class="main-content mt-0">
+    <div class="page-header align-items-start min-vh-100" style="">
+{#        <span class=""></span>#}
+        <div class="container-fluid">
+        {% block content %}{% endblock %}
+        </div>
+    </div>
+</main>
+
+<script src="{% static 'dashboard/js/core/popper.min.js' %}"></script>
+<script src="{% static 'dashboard/js/core/bootstrap.min.js' %}"></script>
+  <script src="{% static 'dashboard/js/plugins/perfect-scrollbar.min.js' %}"></script>
+  <script src="{% static 'dashboard/js/plugins/smooth-scrollbar.min.js' %}"></script>
+<script src="{% static 'dashboard/js/material-dashboard.min.js' %}"></script>
+<script src="{% static 'dashboard/js/plugins/chartjs.min.js' %}"></script>
+<script src="{% static 'js/jquery-3.7.1.min.js' %}"></script>
+{% block js %}{% endblock %}
+{#    <!-- This simulates the backend response with HTMX -->#}
+{#    <script>#}
+{#        document.body.addEventListener('htmx:configRequest', (event) => {#}
+{#            // Simulated backend response#}
+{#            event.detail.headers['HX-Trigger'] = JSON.stringify({#}
+{#                voteSubmitted: true#}
+{#            });#}
+{#        });#}
+{#    </script>#}
+
+</body>
+</html>
+

@@ -1,0 +1,209 @@
+{% extends "base.html" %}
+{% load static %}
+{% load thumbnail %}
+{% block content %}
+    <link id="pagestyle" href="{% static 'datatables/datatables.min.css' %}" rel="stylesheet"/>
+    <div class="row">
+        <div class="col-12">
+            <div class="card my-4">
+                <div class="card-header p-0 position-relative mt-n4 mx-3 z-index-2">
+                    <div class="row bg-gradient-primary shadow-primary border-radius-lg pt-4 pb-3">
+                        <div class="col-6 d-flex align-items-center">
+                            <h6 class="text-white text-capitalize pe-3">لیست کاندیدا</h6>
+                        </div>
+                        <div class="col-6 text-start">
+                            <a class="btn bg-gradient-dark mb-0" href="{% url "main:candidate_create" %}"><i
+                                    class="material-icons text-sm">add</i>افزودن</a>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body px-0 pb-2">
+                    <div class="table-responsive p-0 px-3">
+                        {% if object_list %}
+                            <table id="candidates-table" class="table align-items-center mb-0">
+                                <thead>
+                                <tr>
+                                {% if user.is_superuser %}
+                                    <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">id
+                                    </th>
+                                    {% endif %}
+                                                                    <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">#
+                                    </th>
+                                    <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">
+                                        عکس
+                                    </th>
+                                    <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 ps-2">
+                                        نام
+                                    </th>
+                                    <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">نام
+                                        خانوادگی
+                                    </th>
+                                    <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">
+                                        کد انتخاباتی
+                                    </th>
+                                    <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">
+                                        جنسیت
+                                    </th>
+                                    <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">
+                                        شماره دانشجویی
+                                    </th>
+                                    <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">
+                                        مقطع
+                                    </th>
+                                    <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">
+                                        رشته
+                                    </th>
+                                    <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">
+                                        انجمن
+                                    </th>
+                                    <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">کد
+                                        ملی
+                                    </th>
+                                    <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">
+                                        شماره همراه
+                                    </th>
+                                    {% if perms.vote.update_voter %}
+                                        <th class="text-secondary opacity-7"></th>
+                                    {% endif %}
+                                </tr>
+                                </thead>
+                                <tbody>
+
+                                {% for candidate in object_list %}
+                                    <tr>
+                                                                    {% if user.is_superuser %}
+                                    <td class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">{{ candidate.id }}
+                                    </td>
+                                    {% endif %}
+                                        <td>
+                                            <p class="text-xs font-weight-bold mb-0">{{ forloop.counter }}</p>
+                                        </td>
+                                        <td>
+                                            {% if candidate.election_photo %}
+                                                {% thumbnail candidate.election_photo "200x200" as im %}
+                                                    <img src="{{ im.url }}"
+                                                         alt="{{ candidate.first_name }} {{ candidate.last_name }}"
+                                                         loading="lazy"
+                                                         class="img-fluid border border-info border-5 candidate-image">
+                                                {% endthumbnail %}
+                                            {% elif candidate.personal_photo %}
+                                                {% thumbnail candidate.personal_photo "200x200" as im %}
+                                                    <img src="{{ im.url }}"
+                                                         alt="{{ candidate.first_name }} {{ candidate.last_name }}"
+                                                         loading="lazy"
+                                                         class="img-fluid border border-danger border-5 candidate-image">
+                                                {% endthumbnail %}
+                                            {% else %}
+                                                <div class="text-dark-blue rounded-circle img-thumbnail candidate-image"
+                                                     style="display: flex; justify-content: center; align-items: center;  font-size: 24px; font-weight: bold; text-transform: uppercase;">
+                                                    {#                                                            {{ candidate.first_name|slice:":1" }} {{ candidate.last_name|slice:":1" }}#}
+                                                    <img src="{% static 'img/person.svg' %}" alt="Person" width="100%"
+                                                         height="100%">
+                                                </div>
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            <p class="text-xs font-weight-bold mb-0">{{ candidate.first_name }}</p>
+                                        </td>
+                                        <td>
+                                            <p class="text-xs font-weight-bold mb-0">{{ candidate.last_name }}</p>
+                                        </td>
+                                    <td>
+                                        <p class="text-xs font-weight-bold mb-0">{{ candidate.candidate_code }}</p>
+                                        </td>
+                                        <td>
+                                            <p class="text-xs font-weight-bold mb-0">{{ candidate.get_gender_display }}</p>
+                                        </td>
+                                        <td>
+                                            <p class="text-xs font-weight-bold mb-0">{{ candidate.student_number }}</p>
+                                        </td>
+                                        <td>
+                                            <p class="text-xs font-weight-bold mb-0">{{ candidate.get_education_level_display }}</p>
+                                        </td>
+                                        <td>
+                                            <p class="text-xs font-weight-bold mb-0">{{ candidate.field_of_study }}</p>
+                                        </td>
+                                        <td>
+                                            <p class="text-xs font-weight-bold mb-0">{{ candidate.scientific_association.name }}</p>
+                                        </td>
+                                        <td>
+                                            <p class="text-xs font-weight-bold mb-0">{{ candidate.national_id }}</p>
+                                        </td>
+                                        <td>
+                                            <p class="text-xs font-weight-bold mb-0">{{ candidate.phone_number }}</p>
+                                        </td>
+                                        {#                          <div class="d-flex px-2 py-1">#}
+                                        {#                            <div>#}
+                                        {#                              <img src="../assets/img/team-2.jpg" class="avatar avatar-sm me-3 border-radius-lg" alt="user1">#}
+                                        {#                            </div>#}
+                                        {#                            <div class="d-flex flex-column justify-content-center">#}
+                                        {#                              <h6 class="mb-0 text-sm">John Michael</h6>#}
+                                        {#                              <p class="text-xs text-secondary mb-0">john@creative-tim.com</p>#}
+                                        {#                            </div>#}
+                                        {#                          </div>#}
+                                        {#                        </td>#}
+                                        {#                        <td>#}
+                                        {#                          <p class="text-xs font-weight-bold mb-0">{{ candidate. }}</p>#}
+                                        {#                          <p class="text-xs text-secondary mb-0">Organization</p>#}
+                                        {#                        </td>#}
+                                        {#                        <td class="align-middle text-center text-sm">#}
+                                        {#                          <span class="badge badge-sm bg-gradient-success">Online</span>#}
+                                        {#                        </td>#}
+                                        {#                        <td class="align-middle text-center">#}
+                                        {#                          <span class="text-secondary text-xs font-weight-bold">23/04/18</span>#}
+                                        {#                        </td>#}
+                                        {% if perms.vote.update_voter %}
+                                            <td class="align-middle">
+                                                <a href="{% url "main:candidate_update" pk=candidate.pk %}"
+                                                   class="text-secondary font-weight-bold text-xs"
+                                                   data-toggle="tooltip" data-original-title="Edit user">
+                                                    <span class="material-icons">pencil</span>
+                                                    ویرایش
+                                                </a>
+                                            </td>
+                                        {% endif %}
+                                    </tr>
+                                {% endfor %}
+                                </tbody>
+                            </table>
+                        {% else %}
+                            کاندیدایی برای نمایش وجود ندارد
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+{% block js %}
+    <script src="{% static 'datatables/datatables.min.js' %}"></script>
+    <script>
+        $('#candidates-table').DataTable({
+            "paging": true,
+            "autoWidth": true,
+            "searching": true,
+            "pageLength": 100,
+            "lengthMenu": [[10, 25, 50, 100, 500, -1], [10, 25, 50, 100, 500, "همه"]],
+            "search": {
+                "caseInsensitive": true
+            },
+            "language": {
+                "url": "/static/datatables/persian.lang"
+            },
+            "columnDefs": [
+                {"className": "dt-right", "targets": "_all"}
+            ]
+            {#"layout":{#}
+            {#    top2: 'paging',#}
+            {#    bottomStart: 'info',#}
+            {#    bottomEnd: 'paging'#}
+            {# } #}
+
+        }).on('page', function () {
+            $('main').animate({
+                scrollTop: 0
+            }, 'smooth');
+        });
+
+    </script>
+{% endblock %}

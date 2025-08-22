@@ -1,0 +1,131 @@
+{% extends "base.html" %}
+{% load static %}
+{% load thumbnail %}
+{% block content %}
+    <link id="pagestyle" href="{% static 'datatables/datatables.min.css' %}" rel="stylesheet"/>
+<div class="row">
+          <div class="col-12">
+            <div class="card my-4">
+              <div class="card-header p-0 position-relative mt-n4 mx-3 z-index-2">
+                <div class="row bg-gradient-primary shadow-primary border-radius-lg pt-4 pb-3">
+                  <div class="col-6 d-flex align-items-center">
+ <h6 class="text-white text-capitalize pe-3">لیست انجمن های علمی</h6>
+</div>
+<div class="col-6 text-start">
+<a class="btn bg-gradient-dark mb-0" href="{%  url "main:associations_create" %}"><i class="material-icons text-sm">add</i>افزودن</a>
+</div>
+                </div>
+              </div>
+              <div class="card-body px-0 pb-2">
+                <div class="table-responsive p-0 px-3">
+                {% if object_list %}
+                  <table id="sa-table" class="table align-items-center mb-0 table-responsive">
+                    <thead>
+                      <tr>
+                                                      {% if user.is_superuser %}
+                                    <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">id
+                                    </th>
+                                    {% endif %}
+                        <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">#</th>
+                        <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 ps-2">نام</th>
+                                              <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 ps-2">تعداد کاندیدا</th>
+                        <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 ps-2">لوگو</th>
+
+                          {% if perms.vote.update_voter %}
+                        <th class="text-secondary opacity-7"></th>
+                              {% endif %}
+                      </tr>
+                    </thead>
+                    <tbody>
+
+                    {% for sa in object_list %}
+                      <tr>
+                                                                                          {% if user.is_superuser %}
+                                    <td class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">{{ sa.id }}
+                                    </td>
+                                    {% endif %}
+                                              <td>
+                            <p class="text-xs font-weight-bold mb-0">{{ forloop.counter }}</p>
+                        </td>
+                        <td>
+                            <p class="text-xs font-weight-bold mb-0">{{ sa.name }}</p>
+                        </td>
+                                              <td>
+                            <p class="text-xs font-weight-bold mb-0">{{ sa.candidate_set.count }}</p>
+                        </td>
+                          <td>
+                                                                                    {% thumbnail  sa.logo "200x200" as im %}
+<div class="candidate-photo">
+            <img src="{{ im.url }}" width="{{ im.x }}" height="{{ im.y }}"  alt="{{ sa.logo }}" loading="lazy" class="img-fluid border border-5">
+</div>
+        {% endthumbnail %}
+                          </td>
+{#                          <div class="d-flex px-2 py-1">#}
+{#                            <div>#}
+{#                              <img src="../assets/img/team-2.jpg" class="avatar avatar-sm me-3 border-radius-lg" alt="user1">#}
+{#                            </div>#}
+{#                            <div class="d-flex flex-column justify-content-center">#}
+{#                              <h6 class="mb-0 text-sm">John Michael</h6>#}
+{#                              <p class="text-xs text-secondary mb-0">john@creative-tim.com</p>#}
+{#                            </div>#}
+{#                          </div>#}
+{#                        </td>#}
+{#                        <td>#}
+{#                          <p class="text-xs font-weight-bold mb-0">{{ candidate. }}</p>#}
+{#                          <p class="text-xs text-secondary mb-0">Organization</p>#}
+{#                        </td>#}
+{#                        <td class="align-middle text-center text-sm">#}
+{#                          <span class="badge badge-sm bg-gradient-success">Online</span>#}
+{#                        </td>#}
+{#                        <td class="align-middle text-center">#}
+{#                          <span class="text-secondary text-xs font-weight-bold">23/04/18</span>#}
+{#                        </td>#}
+                      {% if perms.vote.update_voter %}
+                        <td class="align-middle">
+ <a href="{% url "main:associations_update" pk=sa.pk %}" class="text-secondary font-weight-bold text-xs"
+                                               data-toggle="tooltip" data-original-title="Edit user">
+                                                Edit
+                                            </a>
+                        </td>
+
+                      {% endif %}
+                      </tr>
+                    {% endfor %}
+                    </tbody>
+                  </table>
+                    {% else %}
+                    انجمن علمی ای برای نمایش وجود ندارد.
+                {% endif %}
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+{% endblock %}
+
+{% block js %}
+     <script src="{% static 'datatables/datatables.min.js' %}"></script>
+    <script>
+            $('#sa-table').DataTable({
+            "paging": true,
+            "autoWidth": true,
+            "searching": true,
+            "pageLength": 100,
+            "lengthMenu": [[10, 25, 50, 100, 500, -1], [10, 25, 50, 100, 500, "همه"]],
+                "search": {
+                    "caseInsensitive": true
+                },
+                "language": {
+                    "url": "/static/datatables/persian.lang"
+                },
+                                "columnDefs": [
+            { "className": "dt-right", "targets": "_all" }
+        ]
+
+            }).on('page', function() {
+      $('main').animate({
+        scrollTop: 0
+      }, 'smooth');
+});
+    </script>
+{% endblock %}

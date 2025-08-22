@@ -1,0 +1,119 @@
+{% extends "base.html" %}
+{% load static %}
+{% load crispy_forms_tags %}
+{% block content %}
+    <link id="pagestyle" href="{% static 'select2/css/select2.min.css' %}" rel="stylesheet"/>
+    <link id="pagestyle" href="{% static 'select2/css/select2-bootstrap-5-theme.rtl.min.css' %}" rel="stylesheet"/>
+    {#    <div class="me-auto ms-auto col-md-10">#}
+    <div class="col-md-12">
+        <div class="card mt-4">
+            <div class="card-header pb-0 p-3">
+                <div class="row">
+                    <div class="col-6 d-flex align-items-center">
+                        <h6 class="mb-0">{{ form_title }}</h6>
+                    </div>
+                    {#<div class="col-6 text-start">#}
+                    {#<a class="btn bg-gradient-dark mb-0" href="javascript:;"><i class="material-icons text-sm">add</i>&nbsp;&nbsp;Add New Card</a>#}
+                    {#</div>#}
+                </div>
+            </div>
+            <div class="card-body p-3">
+                <div class="row">
+                    {% if form_title == "افزودن رای دهنده" %}
+                        <span id="nationalIdError" class="error" style="color:red;"></span>
+                        <span id="phoneNumberError" class="error" style="color:red;"></span>
+                         <span id="studentIdError" class="error" style="color:red;"></span>
+                    {% endif %}
+                    <form method="post">
+{#                        {% csrf_token %}#}
+                        {% crispy form form.helper %}
+                        {#    <button type="submit" class="btn btn-primary">Submit</button>#}
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+{% endblock %}
+{% block js %}
+    <script src="{% static 'select2/js/select2.min.js' %}"></script>
+    <script src="{% static 'select2/js/i18n/fa.js' %}"></script>
+    <script>
+        $(document).ready(function () {
+            $('input').each(function () {
+                if ($(this).val().trim()) {
+                    $(this).parent().addClass('is-filled');
+                } else {
+                    $(this).parent().removeClass('is-filled');
+                }
+            });
+
+            $("select").select2({
+                theme: "bootstrap-5",
+                language: "fa",
+                dir: "rtl",
+                width: 'style'
+            });
+
+            {% if form_title == "aافزودن رای دهنده" %}
+                $('#submit-id-submit').click(function (e) {
+                    let nationalId = $('#id_national_id').val();
+                    let phoneNumber = $('#id_phone').val();
+                    let studentId = $('#id_student_number').val();
+                    let isValid = true;
+
+                    // Reset error messages
+                    $('.error').text('');
+
+                    // National ID Validation
+                    if (!validateIranianNationalId(nationalId)) {
+                        $('#nationalIdError').text('کد ملی نامعتبر است.');
+                        isValid = false;
+                    }
+
+                    // Phone Number Validation
+                    if (!/^09\d{9}$/.test(phoneNumber)) {
+                        $('#phoneNumberError').text('فرمت شماره تلفن نامعتبر است. باید با 09 شروع شود و 11 رقم باشد.');
+                        isValid = false;
+                    }
+
+                    // Student ID Validation
+                    if (!validateStudentId(studentId)) {
+                        $('#studentIdError').text('شماره دانشجویی نامعتبر است.');
+                        isValid = false;
+                    }
+
+                    // If all validations pass, submit the form
+                    {#if (isValid) {#}
+                        {#return true;#}
+                        {#$('submit-id-submit').unbind('click').click()#}
+                    {# } #}
+                    if (!isValid){
+                       e.preventDefault();
+                    }
+                });
+
+
+                function validateIranianNationalId(nationalId) {
+                    if (!/^\d{10}$/.test(nationalId)) return false;
+                    const check = parseInt(nationalId[9]);
+                    const sum = Array.from(nationalId.substring(0, 9))
+                        .reduce((acc, num, index) => acc + parseInt(num) * (10 - index), 0);
+                    const remainder = sum % 11;
+                    return (remainder < 2 && check === remainder) || (remainder >= 2 && check === 11 - remainder);
+                }
+                function validateStudentId(studentId) {
+                    // Check for 14-digit pattern starting between 399 and 403
+                    if (/^39[9]\d{11}$/.test(studentId) || /^40[0-3]\d{11}$/.test(studentId)) {
+                        return true;
+                    }
+                    // Check for 9-digit pattern starting between 91 and 98
+                    if (/^(9[0-8]\d{7}|403\d{6})$/.test(studentId)) {
+                        return true;
+                    }
+                    return false;
+                }
+            {% endif %}
+        });
+    </script>
+{% endblock %}

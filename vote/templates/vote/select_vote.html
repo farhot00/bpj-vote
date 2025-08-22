@@ -1,0 +1,229 @@
+{% extends "base_front.html" %}
+{% load static %}
+{% load crispy_forms_filters %}
+{% load dict_tags %}
+{% load thumbnail %}
+{% block body %}
+    <div class="modal fade" id="confirmationModal" tabindex="-1" role="dialog" aria-labelledby="confirmationModalLabel"
+         aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="confirmationModalLabel">ثبت نهایی رای</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p class="text-bold text-black">آیا از نهایی نمودن رای خود مطمئن هستید؟پس از ثبت نهایی رای دیگر امکان ویرایش یا حذف آنرا نخواهید داشت!</p>
+{#                    کاندیدای انتخاب شده توسط شما:#}
+                    <ul id="selectedCandidatesList"></ul>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-danger" data-bs-dismiss="modal">خیر</button>
+                    <button type="button" class="btn btn-outline-primary" id="confirmVoteButton">ثبت نهایی رای(ها)</button>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+{% block content %}
+    <style>
+        .candidate-card {
+            margin-top: 1rem !important;
+            margin-bottom: 1rem !important;
+        }
+        .alert{
+            font-size:1.25rem !important;
+        }
+        input[type=checkbox] {
+        transform: scale(1.5);
+            margin-left: 0.5rem;
+        }
+        label{
+            font-size:1rem;
+        }
+    </style>
+    <div class="row">
+        <div class="col-12 mx-auto mt-8">
+            <div class="card z-index-0 fadeIn3 fadeInBottom">
+                <div class="card-header p-0 position-relative mt-n4 mx-3 z-index-2">
+                    {#<div class="bg-gradient-primary shadow-primary border-radius-lg py-3 pe-1">#}
+                    {#<h4 class="text-white font-weight-bolder text-center mt-2 mb-0">انتخاب کاندیدا</h4>#}
+                    {#</div>#}
+                </div>
+                <div class="card-body">
+                    <div class="container mt-5">
+                        <div class="container mt-5">
+                            <h3 class="text-center">سامانه انتخابات آنلاین باشگاه پژوهشگران جوان و نخبگان علوم و تحقیقات</h3>
+                            <p class="text-center">لطفا حداکثر ۵ عدد از کاندیدای مورد نظر خود را انتخاب کنید.انتخاب حداقل یک کاندیدا اجباری می باشد.</p>
+                            <p class="text-center text-bold">انتخاب رای ها به منزله ثبت نهایی رای نیست و رای شما تا وقتی که آنرا با استفاده از دکمه ثبت نهایی رای تایید نکنید ثبت نمی شود.</p>
+                            <div id="message"></div>
+                            <form id="votingForm" action="{% url 'vote:vote_select' otp_token=otp %}" method="post"
+                                  enctype="multipart/form-data">
+                                {% csrf_token %}
+                                <div class="container mt-4">
+    <div class="row text-center">
+        {% for checkbox in form.candidates %}
+            {% with candidate=candidate_dict|get_item:checkbox.data.value %}
+                <div class="col-12 col-md-6 mb-3 d-flex flex-column align-items-center justify-content-center p-3 border rounded shadow-sm">
+                    <div class="mb-2">
+                        <span class="badge bg-primary fs-5">{{ forloop.counter }}</span>
+                    </div>
+                    <div class="mb-2">
+                        {% if candidate.election_photo %}
+                            {% thumbnail candidate.election_photo "200x200" as im %}
+                                <img class="rounded-circle candidate-image" src="{{ im.url }}" width="150" height="150" alt="{{ candidate.first_name }} {{ candidate.last_name }}">
+                            {% endthumbnail %}
+                        {% elif candidate.personal_photo %}
+                            {% thumbnail candidate.personal_photo "200x200" as im %}
+                                <img class="rounded-circle candidate-image" src="{{ im.url }}" width="150" height="150" alt="{{ candidate.first_name }} {{ candidate.last_name }}">
+                            {% endthumbnail %}
+                        {% else %}
+                            <img src="{% static 'img/person.svg' %}" class="rounded-circle candidate-image" alt="Person" width="150" height="150">
+                        {% endif %}
+                    </div>
+                    <div class="candidate-details mb-2">
+                        <h5>{{ candidate.first_name }} {{ candidate.last_name }}</h5>
+                        <p class="text-muted">{{ candidate.get_education_level_display }}</p>
+                    </div>
+                    <div class="form-check">
+                        {{ checkbox }}
+                    </div>
+                </div>
+            {% endwith %}
+        {% endfor %}
+    </div>
+</div>
+
+                                <div id="message2"></div>
+                                <div id="message3"></div>
+                            {{ form.turnstile }}
+                                <button type="button" id="openModalButton" class="btn btn-primary btn-lg col-12 mt-3" data-toggle="modal"
+                                        data-target="#confirmationModal">
+                                    ثبت رای
+                                </button>
+                            </form>
+{#                            <div id="error-message" class="alert alert-danger mt-3 d-none" role="alert">#}
+{#                                {% if form.non_field_errors %}#}
+{#                                    <ul>#}
+{#                                      {% for error in form.non_field_errors %}#}
+{#                                        <li>{{ error }}</li>#}
+{#                                      {% endfor %}#}
+{#                                    </ul>#}
+{#                                {% endif %}#}
+{#                            </div>#}
+{#                        </div>#}
+
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+{% block js %}
+    <script>
+        const checkboxes = document.querySelectorAll('.candidate-checkbox');
+        let turnstileToken = "";
+
+
+        checkboxes.forEach(checkbox => {
+            checkbox.addEventListener('change', updateMessage);
+        });
+        function disableButtons(){
+                $('#openModalButton').prop('disabled', true);
+                $('#confirmVoteButton').prop('disabled', true);
+        }
+        function enableButtons(){
+                $('#openModalButton').prop('disabled', false);
+                $('#confirmVoteButton').prop('disabled', false);
+        }
+
+        function updateMessage() {
+            const selectedCount = document.querySelectorAll('.candidate-checkbox:checked').length;
+            let message = "";
+
+            if (selectedCount === 0) {
+                message = "<div class='alert alert-danger text-white'><i class='material-icons'>cancel</i> شما باید حداقل ۱ کاندیدا انتخاب کنید!</div>";
+                disableButtons();
+            } else if (selectedCount < 5) {
+                message = `<div class='alert alert-info text-white'><i class='material-icons'>check</i> شما ${selectedCount} کاندید انتخاب کرده اید و امکان انتخاب ${5 - selectedCount} کاندیدای دیگر را دارید.</div>`;
+                enableButtons();
+            } else if (selectedCount === 5) {
+                message = "<div class='alert alert-success text-white'><i class='material-icons'>check_circle</i> شما حداکثر تعداد کاندیدای خود را انتخاب کرده اید(۵).</div>";
+                enableButtons();
+            } else if (selectedCount > 5) {
+                message = "<div class='alert alert-danger text-white'><i class='material-icons'>cancel</i>شما نمی توانید بیشتر از ۵ کاندیدا انتخاب کنید!</div>";
+                disableButtons();
+            }
+
+            document.getElementById('message').innerHTML = message;
+            document.getElementById('message2').innerHTML = message;
+        }
+
+        $(document).ready(function () {
+            updateMessage()
+        });
+
+
+        document.getElementById('openModalButton').addEventListener('submit', function (event) {
+            const selectedCount = document.querySelectorAll('.candidate-checkbox:checked').length;
+
+            if (selectedCount < 1 || selectedCount > 5) {
+                event.preventDefault();
+                updateMessage();
+            } else {
+                document.getElementById('message').innerHTML = "";
+            }
+        });
+
+
+        document.getElementById('openModalButton').addEventListener('click', function (event) {
+                        let turnstileToken = document.querySelector('[name="cf-turnstile-response"]').value;
+            console.log(turnstileToken);
+            if (!turnstileToken){
+                let message = "<div class='alert alert-danger text-white'><i class='material-icons'>cancel</i>لطفا تیک من ربات نیستم را بزنید!</div>";
+                document.getElementById('message3').innerHTML = message;
+                event.preventDefault();
+                return
+            } else{
+                document.getElementById('message3').innerHTML = "";
+            }
+            var selectedCandidates = [];
+
+            {#// Get all checkboxes from the form#}
+            {#var checkboxes = document.querySelectorAll('#votingForm input[type="checkbox"]:checked');#}
+            {##}
+            {#// Loop through each checked checkbox and get the associated candidate's name#}
+            {#checkboxes.forEach(function (checkbox) {#}
+            {#    var candidateRow = checkbox.closest('tr');  // Get the parent row of the checkbox#}
+            {#    var candidateName = candidateRow.querySelector('td:nth-child(3)').textContent + " " +#}
+            {#        candidateRow.querySelector('td:nth-child(4)').textContent; // Get First Name + Last Name#}
+            {#    selectedCandidates.push(candidateName);#}
+            {#});#}
+            {##}
+            {#// Update the modal with the selected candidates#}
+            {#var selectedCandidatesList = document.getElementById('selectedCandidatesList');#}
+            {#selectedCandidatesList.innerHTML = '';  // Clear any previous selections#}
+            {##}
+            {#if (0 <selectedCandidates.length < 6) {#}
+            {#    selectedCandidates.forEach(function (name) {#}
+            {#        var li = document.createElement('li');#}
+            {#        li.textContent = name;#}
+            {#        selectedCandidatesList.appendChild(li);#}
+            {#    });#}
+            {#} else {#}
+            {#    selectedCandidatesList.innerHTML = '<li>کاندیدایی انتخاب نشده است.</li>';#}
+            {#    event.preventDefault();#}
+            {#    return#}
+            {#}#}
+
+            // Show the modal
+            $('#confirmationModal').modal('show');
+        });
+
+        document.getElementById('confirmVoteButton').addEventListener('click', function () {
+            document.getElementById('votingForm').submit();  // Submit the form when "Submit Vote" is clicked
+        });
+
+    </script>
+{% endblock %}

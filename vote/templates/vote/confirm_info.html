@@ -1,0 +1,66 @@
+{% extends "base_front.html" %}
+{% block body %}
+    <div class="modal fade" id="confirmationModal" tabindex="-1" role="dialog" aria-labelledby="confirmationModalLabel"
+         aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="confirmationModalLabel">ثبت نهایی رای</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p class="text-bold text-black">آیا از نهایی نمودن رای خود مطمئن هستید؟پس از ثبت نهایی رای دیگر امکان ویرایش یا حذف آنرا نخواهید داشت!</p>
+                    کاندیدای انتخاب شده توسط شما:
+                    <ul id="selectedCandidatesList"></ul>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-danger" data-bs-dismiss="modal">خیر</button>
+                    <button type="button" class="btn btn-outline-primary" id="confirmVoteButton">ثبت نهایی رای(ها)</button>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+{% block content %}
+    <div class="row">
+        <div class="col-lg-12 col-md-8 col-12 mx-auto mt-8">
+            <div class="card z-index-0 fadeIn3 fadeInBottom">
+                <div class="card-header p-0 position-relative mt-n4 mx-3 z-index-2">
+                <div class="row bg-gradient-primary shadow-primary border-radius-lg pt-4 pb-3 text-center">
+<h2 class="text-white">تأیید اطلاعات شما</h2>
+{#<div class="col-6 text-start">#}
+{#<a class="btn bg-gradient-dark mb-0" href="/candidates/new"><i class="material-icons text-sm">add</i>افزودن</a>#}
+{#</div>#}
+                </div>
+              </div>
+<div class="card-body text-center">
+<h5 class="text-bolder text-center text-danger">لطفاً اطلاعات شخصی خود را با دقت بررسی کنید و در صورت مشاهده هرگونه مغایرت، به اپراتورها اطلاع دهید. توجه داشته باشید که در صورت وجود هرگونه مغایرت، رأی شما باطل محسوب خواهد شد.</h5>
+  <p>نام: {{ voter.first_name }}</p>
+  <p>نام خانوادگی: {{ voter.last_name }}</p>
+  <p>نام پدر: {{ voter.fathers_name }}</p>
+  <p>جنسیت: {{ voter.get_gender_display }}</p>
+  <p>سطح تحصیلات: {{ voter.get_education_level_display }}</p>
+  <p>کد ملی: {{ voter.national_id }}</p>
+  <p>رشته تحصیلی: {{ voter.field_of_study }}</p>
+    {% if voter.email %}
+  <p>ایمیل: {{ voter.email }}</p>
+    {% endif %}
+  <p>شماره تلفن: {{ voter.phone }}</p>
+
+  <form id="votingForm" action="{% url 'vote:confirm_info' otp_token=otp_token %}" method="post"
+                                  enctype="multipart/form-data">
+    {% csrf_token %}
+    <button class="btn btn-primary" type="submit" name="confirm">تایید اطلاعات</button>
+  </form>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+{% block js %}
+    <script>
+        document.getElementById('confirmVoteButton').addEventListener('click', function () {
+            document.getElementById('votingForm').submit();  // Submit the form when "Submit Vote" is clicked
+        });
+
+    </script>
+{% endblock %}

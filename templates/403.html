@@ -1,0 +1,15 @@
+{% extends "base_front.html" %}
+{% block content %}
+    <div class="row">
+        <div class="col-lg-12 col-md-8 col-12 mx-auto mt-8">
+            <div class="card z-index-0 fadeIn3 fadeInBottom">
+<div class="card-body text-center">
+  <h2>403!</h2>
+  <h2>شما اجازه دسترسی به این صفحه را ندارید!</h2>
+    {% if exception != "Http403" %}
+          <h2>{{ exception }}</h2>
+    {% endif %}
+            </div>
+        </div>
+    </div>
+{% endblock %}

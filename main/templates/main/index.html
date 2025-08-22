@@ -1,0 +1,586 @@
+{% extends "base.html" %}
+{% load static %}
+{% block content %}
+    <div class="row">
+        <div class="col-lg-3 col-sm-6 mb-5">
+            <div class="card">
+                <div class="card-header p-3 pt-2">
+                    <div class="icon icon-lg icon-shape bg-dark shadow-dark text-center border-radius-xl mt-n4 position-absolute">
+                        <i class="material-icons opacity-10">groups</i>
+                    </div>
+                    <div class="text-start pt-1">
+                        <p class="text-sm mb-0 text-capitalize">انجمن های علمی</p>
+                        <h4 class="mb-0">{{ scientific_association_count }}</h4>
+                    </div>
+                </div>
+                <hr class="dark horizontal my-0">
+                <div class="card-footer p-3">
+                    <!-- <p class="mb-0 text-start"><span class="text-success text-sm font-weight-bolder ms-1">+55% </span>من الأسبوع الماضي</p> -->
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-3 col-sm-6 mb-5">
+            <div class="card">
+                <div class="card-header p-3 pt-2">
+                    <div class="icon icon-lg icon-shape bg-purple shadow-primary text-center border-radius-xl mt-n4 position-absolute">
+                        <i class="material-icons opacity-10">assignment_ind</i>
+                    </div>
+                    <div class="text-start pt-1">
+                        <p class="text-sm mb-0 text-capitalize">کاندیدا</p>
+                        <h4 class="mb-0">{{ candidate_count }}</h4>
+                    </div>
+                </div>
+                <hr class="dark horizontal my-0">
+                <div class="card-footer p-3">
+                    <!-- <p class="mb-0 text-start"><span class="text-success text-sm font-weight-bolder ms-1">+33% </span>من الأسبوع الماضي</p> -->
+                </div>
+            </div>
+        </div>
+                {% if perms.vote.update_voter %}
+                <div class="col-lg-3 col-sm-6 mb-5">
+            <div class="card">
+                <div class="card-header p-3 pt-2">
+                    <div class="icon icon-lg icon-shape bg-yellow shadow-info text-center border-radius-xl mt-n4 position-absolute">
+                        <i class="material-icons opacity-10">group</i>
+                    </div>
+                    <div class="text-start pt-1">
+                        <p class="text-sm mb-0 text-capitalize">کاربران سایت</p>
+                        <h4 class="mb-0">{{ user_count }}</h4>
+                    </div>
+                </div>
+                <hr class="dark horizontal my-0">
+                <div class="card-footer p-3">
+                    <!-- <p class="mb-0 text-start"><span class="text-success text-sm font-weight-bolder ms-1">+7% </span>مقارنة بيوم أمس</p> -->
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-3 col-sm-6 mb-5">
+            <div class="card">
+                <div class="card-header p-3 pt-2">
+                    <div class="icon icon-lg icon-shape bg-success shadow-success text-center border-radius-xl mt-n4 position-absolute">
+                        <i class="material-icons opacity-10">show_chart</i>
+                    </div>
+                    <div class="text-start pt-1">
+                        <p class="text-sm mb-0 text-capitalize">رای دهندگان</p>
+                        <h4 class="mb-0">
+                            <!-- <span class="text-danger text-sm font-weight-bolder ms-1">-2%</span> -->
+                            {{ voter_count }}
+                        </h4>
+                    </div>
+                </div>
+                <hr class="dark horizontal my-0">
+                <div class="card-footer p-3">
+                    <!-- <p class="mb-0 text-start"><span class="text-success text-sm font-weight-bolder ms-1">+5% </span>من الشهر الماضي</p> -->
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-3 col-sm-6 mb-5">
+            <div class="card">
+                <div class="card-header p-3 pt-2">
+                    <div class="icon icon-lg icon-shape bg-info shadow-info text-center border-radius-xl mt-n4 position-absolute">
+                        <i class="material-icons opacity-10">how_to_vote</i>
+                    </div>
+                    <div class="text-start pt-1">
+                        <p class="text-sm mb-0 text-capitalize">رای</p>
+                        <h4 class="mb-0">{{ vote_count }}</h4>
+                    </div>
+                </div>
+                <hr class="dark horizontal my-0">
+                <div class="card-footer p-3">
+                    <!-- <p class="mb-0 text-start"><span class="text-success text-sm font-weight-bolder ms-1">+7% </span>مقارنة بيوم أمس</p> -->
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-3 col-sm-6 mb-5">
+            <div class="card">
+                <div class="card-header p-3 pt-2">
+                    <div class="icon icon-lg icon-shape bg-info shadow-info text-center border-radius-xl mt-n4 position-absolute">
+                        <i class="material-icons opacity-10">functions</i>
+                    </div>
+                    <div class="text-start pt-1">
+                        <p class="text-sm mb-0 text-capitalize">میانگین رای</p>
+                        <h4 class="mb-0">{{ average_votes_per_voter|floatformat:2 }}</h4>
+                    </div>
+                </div>
+                <hr class="dark horizontal my-0">
+                <div class="card-footer p-3">
+                    <!-- <p class="mb-0 text-start"><span class="text-success text-sm font-weight-bolder ms-1">+7% </span>مقارنة بيوم أمس</p> -->
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-3 col-sm-6 mb-5">
+            <div class="card">
+                <div class="card-header p-3 pt-2">
+                    <div class="icon icon-lg icon-shape bg-orange shadow-info text-center border-radius-xl mt-n4 position-absolute">
+                        <i class="material-icons opacity-10">sms</i>
+                    </div>
+                    <div class="text-start pt-1">
+                        <p class="text-sm mb-0 text-capitalize">پیامک های ارسالی</p>
+                        <h4 class="mb-0">{{ sms_count }}</h4>
+                    </div>
+                </div>
+                <hr class="dark horizontal my-0">
+                <div class="card-footer p-3">
+                    <!-- <p class="mb-0 text-start"><span class="text-success text-sm font-weight-bolder ms-1">+7% </span>مقارنة بيوم أمس</p> -->
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-3 col-sm-6 mb-5">
+            <div class="card">
+                <div class="card-header p-3 pt-2">
+                    <div class="icon icon-lg icon-shape bg-danger shadow-info text-center border-radius-xl mt-n4 position-absolute">
+                        <i class="material-icons opacity-10">attach_money</i>
+                    </div>
+                    <div class="text-start pt-1">
+                        <p class="text-sm mb-0 text-capitalize">هزینه پیامک ها</p>
+                        <h4 class="mb-0">{{ sms_credit_used }}</h4>
+                    </div>
+                </div>
+                <hr class="dark horizontal my-0">
+                <div class="card-footer p-3">
+                    <!-- <p class="mb-0 text-start"><span class="text-success text-sm font-weight-bolder ms-1">+7% </span>مقارنة بيوم أمس</p> -->
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-3 col-sm-6 mb-5">
+            <div class="card">
+                <div class="card-header p-3 pt-2">
+                    <div class="icon icon-lg icon-shape bg-pink shadow-info text-center border-radius-xl mt-n4 position-absolute">
+                        <i class="material-icons opacity-10">outgoing_mail</i>
+                    </div>
+                    <div class="text-start pt-1">
+                        <p class="text-sm mb-0 text-capitalize">ایمیل ارسالی</p>
+                        <h4 class="mb-0">{{ email_count }}</h4>
+                    </div>
+                </div>
+                <hr class="dark horizontal my-0">
+                <div class="card-footer p-3">
+                    <!-- <p class="mb-0 text-start"><span class="text-success text-sm font-weight-bolder ms-1">+7% </span>مقارنة بيوم أمس</p> -->
+                </div>
+            </div>
+        </div>
+                <div class="col-lg-3 col-sm-6 mb-5">
+            <div class="card">
+                <div class="card-header p-3 pt-2">
+                    <div class="icon icon-lg icon-shape bg-cyan shadow-info text-center border-radius-xl mt-n4 position-absolute">
+                        <i class="material-icons opacity-10">key</i>
+                    </div>
+                    <div class="text-start pt-1">
+                        <p class="text-sm mb-0 text-capitalize">OTP</p>
+                        <h4 class="mb-0">{{ otp_count }}</h4>
+                    </div>
+                </div>
+                <hr class="dark horizontal my-0">
+                <div class="card-footer p-3">
+                    <!-- <p class="mb-0 text-start"><span class="text-success text-sm font-weight-bolder ms-1">+7% </span>مقارنة بيوم أمس</p> -->
+                </div>
+            </div>
+        </div>
+            <div class="col-lg-3 col-sm-6 mb-5">
+            <div class="card">
+                <div class="card-header p-3 pt-2">
+                    <div class="icon icon-lg icon-shape bg-dark-blue shadow-info text-center border-radius-xl mt-n4 position-absolute">
+                        <i class="material-icons opacity-10">lock_open</i>
+                    </div>
+                    <div class="text-start pt-1">
+                        <p class="text-sm mb-0 text-capitalize">OTP استفاده شده</p>
+                        <h4 class="mb-0">{{ used_otp_count }}</h4>
+                    </div>
+                </div>
+                <hr class="dark horizontal my-0">
+                <div class="card-footer p-3">
+                    <!-- <p class="mb-0 text-start"><span class="text-success text-sm font-weight-bolder ms-1">+7% </span>مقارنة بيوم أمس</p> -->
+                </div>
+            </div>
+        </div>
+            <div class="col-lg-3 col-sm-6 mb-5">
+            <div class="card">
+                <div class="card-header p-3 pt-2">
+                    <div class="icon icon-lg icon-shape bg-red shadow-info text-center border-radius-xl mt-n4 position-absolute">
+                        <i class="material-icons opacity-10">lock_clock</i>
+                    </div>
+                    <div class="text-start pt-1">
+                        <p class="text-sm mb-0 text-capitalize">OTP منقضی</p>
+                        <h4 class="mb-0">{{ expired_otp_count }}</h4>
+                    </div>
+                </div>
+                <hr class="dark horizontal my-0">
+                <div class="card-footer p-3">
+                    <!-- <p class="mb-0 text-start"><span class="text-success text-sm font-weight-bolder ms-1">+7% </span>مقارنة بيوم أمس</p> -->
+                </div>
+            </div>
+        </div>
+    {% endif %}
+    </div>
+    {% if perms.vote.update_voter %}
+    <div class="row">
+        <div class="col-md-6 mt-4 mb-4">
+            <div class="card z-index-2 ">
+                <div class="card-header p-0 position-relative mt-n4 mx-3 z-index-2 bg-transparent">
+                    <div class="bg-info shadow-primary border-radius-lg py-3 pe-1">
+                        <div class="chart">
+                            <canvas id="vote-graph" class="chart-canvas" height="170"></canvas>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <h6 class="mb-0 ">رای های داده شده</h6>
+                    <p class="text-sm ">به تفکیک ساعت</p>
+{#                    <hr class="dark horizontal">#}
+{#                    <div class="d-flex ">#}
+{#                        <i class="material-icons text-sm my-auto ms-1">schedule</i>#}
+{#                        <p class="mb-0 text-sm">بروز شده ۱ دقیقه پیش </p>#}
+{#                    </div>#}
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6 mt-4 mb-4">
+            <div class="card z-index-2  ">
+                <div class="card-header p-0 position-relative mt-n4 mx-3 z-index-2 bg-transparent">
+                    <div class="bg-gradient-success shadow-success border-radius-lg py-3 pe-1">
+                        <div class="chart">
+                            <canvas id="voter-graph" class="chart-canvas" height="170"></canvas>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <h6 class="mb-0 ">میزان شرکت در انتخابات </h6>
+                    <p class="text-sm ">تعداد افراد شرکت کننده در انتخابات</p>
+{#                    <hr class="dark horizontal">#}
+{#                    <div class="d-flex ">#}
+{#                        <i class="material-icons text-sm my-auto ms-1">schedule</i>#}
+{#                        <p class="mb-0 text-sm"> بروز شده ۴ دقیقه پیش</p>#}
+{#                    </div>#}
+                </div>
+            </div>
+        </div>
+{#        <div class="col-md-6 mt-4 mb-3">#}
+{#            <div class="card z-index-2 ">#}
+{#                <div class="card-header p-0 position-relative mt-n4 mx-3 z-index-2 bg-transparent">#}
+{#                    <div class="bg-dark shadow-dark border-radius-lg py-3 pe-1">#}
+{#                        <div class="chart">#}
+{#                            <canvas id="voter-graph-tasks" class="chart-canvas" height="170"></canvas>#}
+{#                        </div>#}
+{#                    </div>#}
+{#                </div>#}
+{#                <div class="card-body">#}
+{#                    <h6 class="mb-0 ">تعداد پیامک ارسال شده</h6>#}
+{#                    <p class="text-sm ">به دانشجویان شرکت کننده</p>#}
+{#                    <hr class="dark horizontal">#}
+{#                    <div class="d-flex ">#}
+{#                        <i class="material-icons text-sm my-auto me-1">schedule</i>#}
+{#                        <p class="mb-0 text-sm">بروز شده همین الان</p>#}
+{#                    </div>#}
+{#                </div>#}
+{#            </div>#}
+{#        </div>#}
+    <div class="col-12 mt-4 mb-3">
+            <div class="card z-index-2 ">
+                <div class="card-header p-0 position-relative mt-n4 mx-3 z-index-2 bg-transparent">
+                    <div class="bg-gradient-red shadow-dark border-radius-lg py-3 pe-1">
+                        <div class="chart">
+                            <canvas id="sa-graph" class="chart-canvas" height="170"></canvas>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <h6 class="mb-0 ">تعداد بیشترین رای ها</h6>
+                    <p class="text-sm ">تفکیک بر اساس انجمن</p>
+{#                    <hr class="dark horizontal">#}
+{#                    <div class="d-flex ">#}
+{#                        <i class="material-icons text-sm my-auto me-1">schedule</i>#}
+{#                        <p class="mb-0 text-sm">بروز شده همین الان</p>#}
+{#                    </div>#}
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+{% endblock %}
+{% block js %}
+    {% if perms.vote.update_voter %}
+      <script src="{% static 'dashboard/js/plugins/chartjs.min.js' %}"></script>
+         <script>
+            $(document).ready(function() {
+                // Make the AJAX request to fetch vote data
+                $.ajax({
+                    url: "{% url 'main:vote_graph_ajax' %}",  // URL to the AJAX view
+                    method: "GET",
+                    success: function(response) {
+                        // Parse the labels and data from the response
+                        var labels = response.labels;
+                        var data = response.data;
+var ctx = document.getElementById("vote-graph").getContext("2d");
+
+        new Chart(ctx, {
+            type: "bar",
+            data: {
+                labels: labels,
+                datasets: [{
+                    tension: 0.4,
+                    borderWidth: 0,
+                    borderRadius: 4,
+                    borderSkipped: false,
+                    backgroundColor: "rgba(255, 255, 255, .8)",
+                    data: data,
+                    maxBarThickness: 6
+                },],
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        display: false,
+                    }
+                },
+                interaction: {
+                    intersect: false,
+                    mode: 'index',
+                },
+                scales: {
+                    y: {
+                        grid: {
+                            drawBorder: false,
+                            display: true,
+                            drawOnChartArea: true,
+                            drawTicks: false,
+                            borderDash: [5, 5],
+                            color: 'rgba(255, 255, 255, .2)'
+                        },
+                        ticks: {
+                            suggestedMin: 0,
+                            suggestedMax: 500,
+                            beginAtZero: true,
+                            padding: 10,
+                            stepSize: 1,
+                            font: {
+                                size: 14,
+                                weight: 300,
+                               
+                                style: 'normal',
+                                lineHeight: 2
+                            },
+                            color: "#fff"
+                        },
+                    },
+                    x: {
+                        grid: {
+                            drawBorder: false,
+                            display: true,
+                            drawOnChartArea: true,
+                            drawTicks: false,
+                            borderDash: [5, 5],
+                            color: 'rgba(255, 255, 255, .2)'
+                        },
+                        ticks: {
+                            display: true,
+                            color: '#f8f9fa',
+                            padding: 10,
+                            font: {
+                                size: 14,
+                                weight: 300,
+                               
+                                style: 'normal',
+                                lineHeight: 2
+                            },
+                        }
+                    },
+                },
+            },
+        });
+                    },
+                    error: function(xhr, status, error) {
+                        console.error("Error fetching vote data:", error);
+                    }
+                });
+                 $.ajax({
+                    url: "{% url 'main:voter_graph_ajax' %}",  // URL to the AJAX view
+                    method: "GET",
+                    success: function(response) {
+                        // Parse the labels and data from the response
+                        var labels = response.labels;
+                        var data = response.data;
+var ctx2 = document.getElementById("voter-graph").getContext("2d");
+
+        new Chart(ctx2, {
+            type: "bar",
+            data: {
+                labels: labels,
+                datasets: [{
+                    tension: 0,
+                    borderWidth: 0,
+                    pointRadius: 5,
+                    pointBackgroundColor: "rgba(255, 255, 255, .8)",
+                    pointBorderColor: "transparent",
+                    borderColor: "rgba(255, 255, 255, .8)",
+                    borderColor: "rgba(255, 255, 255, .8)",
+                    borderWidth: 4,
+                    backgroundColor: "transparent",
+                    fill: true,
+                    data: data,
+                    maxBarThickness: 6
+
+                }],
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        display: false,
+                    }
+                },
+                interaction: {
+                    intersect: false,
+                    mode: 'index',
+                },
+                scales: {
+                    y: {
+                        grid: {
+                            drawBorder: false,
+                            display: true,
+                            drawOnChartArea: true,
+                            drawTicks: false,
+                            borderDash: [5, 5],
+                            color: 'rgba(255, 255, 255, .2)'
+                        },
+                        ticks: {
+                            display: true,
+                            color: '#f8f9fa',
+                            padding: 10,
+                            stepSize: 1,
+                            font: {
+                                size: 14,
+                                weight: 300,
+                                style: 'normal',
+                                lineHeight: 2
+                            },
+                        }
+                    },
+                    x: {
+                        grid: {
+                            drawBorder: false,
+                            display: false,
+                            drawOnChartArea: false,
+                            drawTicks: false,
+                            borderDash: [5, 5]
+                        },
+                        ticks: {
+                            display: true,
+                            color: '#f8f9fa',
+                            padding: 10,
+                            font: {
+                                size: 14,
+                                weight: 300,
+                               
+                                style: 'normal',
+                                lineHeight: 2
+                            },
+                        }
+                    },
+                },
+            },
+        });
+                    },
+                    error: function(xhr, status, error) {
+                        console.error("Error fetching vote data:", error);
+                    }
+                });
+                 $.ajax({
+                    url: "{% url 'main:sa_graph_ajax' %}",  // URL to the AJAX view
+                    method: "GET",
+                    success: function(response) {
+                        // Parse the labels and data from the response
+                        var labels = response.labels;
+                        var data = response.data;
+var ctx4 = document.getElementById("sa-graph").getContext("2d");
+
+        new Chart(ctx4, {
+            type: "bar",
+            data: {
+                labels: labels,
+                datasets: [{
+                    tension: 0,
+                    borderWidth: 0,
+                    pointRadius: 5,
+                    pointBackgroundColor: "rgba(255, 255, 255, .8)",
+                    pointBorderColor: "transparent",
+                    borderColor: "rgba(255, 255, 255, .8)",
+                    borderColor: "rgba(255, 255, 255, .8)",
+                    borderWidth: 4,
+                    backgroundColor: "transparent",
+                    fill: true,
+                    data: data,
+                    maxBarThickness: 6
+
+                }],
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        display: false,
+                    }
+                },
+                interaction: {
+                    intersect: false,
+                    mode: 'index',
+                },
+                scales: {
+                    y: {
+                        grid: {
+                            drawBorder: false,
+                            display: true,
+                            drawOnChartArea: true,
+                            drawTicks: false,
+                            borderDash: [5, 5],
+                            color: 'rgba(255, 255, 255, .2)'
+                        },
+                        ticks: {
+                            display: true,
+                            color: '#f8f9fa',
+                            padding: 10,
+                            stepSize: 1,
+                            font: {
+                                size: 14,
+                                weight: 300,
+                                style: 'normal',
+                                lineHeight: 2
+                            },
+                        }
+                    },
+                    x: {
+                        grid: {
+                            drawBorder: false,
+                            display: false,
+                            drawOnChartArea: false,
+                            drawTicks: false,
+                            borderDash: [5, 5]
+                        },
+                        ticks: {
+                            display: true,
+                            color: '#f8f9fa',
+                            padding: 10,
+                            maxTicksLimit: 32,
+                            font: {
+                                size: 10,
+                                weight: 300,
+                                style: 'normal',
+                                lineHeight: 2
+                            },
+                        }
+                    },
+                },
+            },
+        });
+                    },
+                    error: function(xhr, status, error) {
+                        console.error("Error fetching vote data:", error);
+                    }
+                });
+            });
+        </script>
+{% endif %}
+{% endblock %}

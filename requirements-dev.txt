@@ -1,0 +1,3 @@
+django-debug-toolbar
+#python-resize-image
+#rembg[gpu,cli]

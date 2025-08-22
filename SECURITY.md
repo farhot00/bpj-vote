@@ -1,0 +1,40 @@
+- Security
+  - HTTPS/TLS/Transit
+  - 2FA
+  - Limit login attempts
+  - CSRF
+  - XSS
+  - SQL Injection
+  - CORS
+  - Session management
+  - Cryptographical Secure random tokens for links
+  - Short-lived tokens
+  - Form sanitization
+  - Form validation on both server and client
+  - Proper error handling
+  - Internal and external rate limiting
+  - Proper previleges and permissions for different users
+  - logging every action
+  - backups
+  - unittests
+  - pen tests
+  - monitoring
+    - Prometheus
+    - Grafana
+  - Dockerize
+  - Standard operational procedures (SoPs)
+  - Secure storage
+  - Caching/queuing?
+  - CI/CD
+  - Alerts
+  - Disaster recovery and failovers
+  - redundancy
+  - Documentation
+
+- Diagram
+  - Admin
+    - Management
+      - BPJ Team
+        - Volunteers
+        - Reviewers
+          - Students

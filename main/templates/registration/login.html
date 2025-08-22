@@ -1,0 +1,54 @@
+{% extends "base_front.html" %}
+P%
+{% load static %}
+{% block content %}
+    <div class="row">
+        <div class="col-lg-4 col-md-8 col-12 mx-auto mt-8">
+            <div class="card z-index-0 fadeIn3 fadeInBottom">
+                <div class="card-header p-0 position-relative mt-n4 mx-3 z-index-2">
+                <div class="row bg-gradient-primary shadow-primary border-radius-lg pt-4 pb-3 text-center">
+<h2 class="text-white">ورود</h2>
+<h3 class="text-white">سامانه انتخابات آنلاین</h3>
+{#<div class="col-6 text-start">#}
+{#<a class="btn bg-gradient-dark mb-0" href="/candidates/new"><i class="material-icons text-sm">add</i>افزودن</a>#}
+{#</div>#}
+                </div>
+              </div>
+<div class="card-body text-center">
+<img class="img-fluid" src="{% static "img/logo.png" %}" alt="باشگاه پژوهشگران جوان و نخبگان علوم و تحقیقات" style="width:50%"/>
+<form method="post" action="{% url 'main:login' %}">
+        {% csrf_token %}
+<div class="input-group input-group-outline my-3">
+                    <label class="form-label">نام کاربری</label>
+                    <input type="text" id="username" name="username" class="form-control" onfocus="focused(this)" onfocusout="defocused(this)">
+                  </div>
+<div class="input-group input-group-outline my-3">
+                    <label class="form-label">رمز عبور</label>
+                    <input type="password" id="password" name="password" class="form-control" onfocus="focused(this)" onfocusout="defocused(this)">
+                  </div>
+{#        {{ form.recaptcha }}#}
+        {{ form.turnstile }}
+        <button class="btn bg-gradient-primary w-100 my-4 mb-2" type="submit">ورود</button>
+
+        {% if form.errors %}
+{% for field, errors in form.errors.items %}
+{#    <p style="color: red;"><strong>{{ field|capfirst }}:</strong></p>#}
+    {% for error in errors %}
+        <p style="color: red;">{{ error }}</p>
+    {% endfor %}
+{% endfor %}
+
+        {% endif %}
+    </form>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+{% block js %}
+    <script>
+        document.getElementById('confirmVoteButton').addEventListener('click', function () {
+            document.getElementById('votingForm').submit();  // Submit the form when "Submit Vote" is clicked
+        });
+
+    </script>
+{% endblock %}

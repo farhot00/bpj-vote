@@ -1,0 +1,243 @@
+{% extends "base_slideshow.html" %}
+{% load static %}
+{% load thumbnail %}
+{% block content %}
+    <style>
+    .overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  right: 0;
+  background: rgba(255,255,255,1);
+  z-index: 9999;
+}
+ .overlay_spinner {
+    position: fixed;
+    width: 100%;
+    height: 100%;
+    z-index: 9999;
+    top: 40%;
+    left: 0px;
+    /*opacity: 0.5;*/
+    /*filter: alpha(opacity=50);*/
+
+ }
+    {#.candidate-card{#}
+    {#    margin-bottom: 0.5rem;#}
+    {# } #}
+    .candidate-card p {
+        margin: 0 !important;
+        padding:0 !important;
+        line-height: 1.4;
+    }
+    </style>
+     <div class="overlay" id="overlay">
+     <div class="overlay_spinner">
+      <div class="d-flex justify-content-center">
+        <div class="spinner-border text-primary" role="status" style="width: 3rem; height: 3rem; z-index: -9999;">
+{#          <span class="sr-only">Loading...</span>#}
+        </div>
+      </div>
+         </div>
+    </div>
+<div>
+            <h5 class="text-center">آمار تا ساعت <span>{{ updated_time }} | تعداد کل رای ها: {{ total_votes_all_associations }}</span></h5>
+<div id="carouselExampleIndicators" class="carousel carousel-dark slide" data-bs-theme="dark">
+{#  <div class="carousel-indicators">#}
+{#       {% for sa in associations %}#}
+{#    <button type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide-to="{{ forloop.counter0 }}" class="active" aria-current="true" aria-label="Slide {{ forloop.counter }}"></button>#}
+{#    {% endfor %}#}
+{#  </div>#}
+    <div class="carousel-inner">
+      {% for sa in associations %}
+    <div class="carousel-item slideshow{% if forloop.counter == 1 %} active{% endif %}">
+{#      <img src="https://images.unsplash.com/photo-1675351066828-6fc770b90dd2?auto=format&amp;fit=crop&amp;q=80&amp;ixlib=rb-4.0.3&amp;ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&amp;w=870&amp;q=80" alt="سامانه رای گیری آنلاین" class="absolute left-0 top-0 h-full w-full rounded-t object-cover">#}
+                                    <div class="row text-center justify-content-md-center">
+                                        <h4 class="">انجمن علمی دانشجویی {{ sa.name }} | {{ sa.total_votes }} رای</h4>
+                                        {% for candidate in sa.candidate_set.all %}
+                                            <div class="col-md-3 candidate-card mb-3">
+                                                                                            {% if candidate.election_photo %}
+                                                        {% thumbnail candidate.election_photo "200x200" as im %}
+                                                            <img class="rounded-circle img-thumbnail slideshow-candidate-image"
+                                                                 loading="lazy"
+                                                                 src="{{ im.url }}"
+{#                                                                 height="{{ im.y }}"#}
+                                                                 alt="{{ candidate.first_name }} {{ candidate.last_name }}">
+                                                        {% endthumbnail %}
+{% elif candidate.personal_photo %}
+                                                {% thumbnail candidate.personal_photo "200x200" as im %}
+                                                            <img class="rounded-circle img-thumbnail slideshow-candidate-image"
+                                                                 loading="lazy"
+                                                                 src="{{ im.url }}"
+{#                                                                 height="{{ im.y }}"#}
+                                                                 alt="{{ candidate.first_name }} {{ candidate.last_name }}">
+                                                        {% endthumbnail %}
+                                                                                            {% else %}
+                                                        <div class="ms-auto me-auto text-dark-blue rounded-circle img-thumbnail slideshow-candidate-image"
+                                                             style="display: flex; justify-content: center; align-items: center;  font-size: 24px; font-weight: bold; text-transform: uppercase;">
+{#                                                            {{ candidate.first_name|slice:":1" }} {{ candidate.last_name|slice:":1" }}#}
+                                                        <img src="{% static 'img/person.svg' %}" alt="Person"  width="100%" height="100%">
+                                                        </div>
+                                                    {% endif %}
+                                        <h5 class="text-bolder text-dark m-0">{{ candidate.first_name }} {{ candidate.last_name }}</h5>
+                                        <h5 class="text-bold text-black-50 m-0">{{ candidate.vote_count }} رای | {{ candidate.vote_percentage|floatformat:2 }}%</h5>
+                                    </div>
+                                        {% empty %}
+                                            <li>No candidates for this association.</li>
+                                        {% endfor %}
+
+                                    <!-- Add more candidate cards here -->
+    </div>
+    </div>
+      {% endfor %}
+{#    <div class="carousel-item slideshow{% if forloop.counter == 1 %} active{% endif %}">#}
+{#    <div class="text-center">#}
+{#                    <h6 class="mb-0 ">تعداد رای ها به تفکیک انجمن</h6>#}
+{#    </div>#}
+{#        <div class="bg-light shadow-dark border-radius-lg py-3 pe-1">#}
+{#                        <div class="chart">#}
+{#                            <canvas style="height: 60%;" id="sa-graph" class="chart-canvas"></canvas>#}
+{#                        </div>#}
+{#                    </div>#}
+{#                    <hr class="dark horizontal">#}
+{#                    <div class="d-flex ">#}
+{#                        <i class="material-icons text-sm my-auto me-1">schedule</i>#}
+{#                        <p class="mb-0 text-sm">بروز شده همین الان</p>#}
+{#                    </div>#}
+{#            </div>#}
+
+  <button class="carousel-control-prev" type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide="prev">
+    <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+    <span class="visually-hidden">Previous</span>
+  </button>
+  <button class="carousel-control-next" type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide="next">
+    <span class="carousel-control-next-icon" aria-hidden="true"></span>
+    <span class="visually-hidden">Next</span>
+  </button>
+</div>
+{% endblock %}
+{% block js %}
+    <script>
+    $(document).ready(function() {
+        $('#overlay').remove();
+        {#const myCarousel = document.getElementById('carouselExampleIndicators')#}
+        {##}
+        {#const carousel_items = $('.carousel-item').length;#}
+        {#const carousel_interval = $('#carouselExampleIndicators').data('bs-interval');#}
+        {#myCarousel.addEventListener('slid.bs.carousel', event => {#}
+        {#    console.log(event.to);#}
+        {#     if (event.to === 0) {#}
+             {#if (event.to === (carousel_items - 1)) {#}
+        {#    // Reload the location if event.to is 0#}
+            {#location.reload();#}
+            {#     setInterval(function(){location.reload()}, carousel_interval);#}
+        {#    location.reload();#}
+        {#}#}
+        {#});#}
+        {#const carousel_items = $('.carousel-item').length;#}
+        {#const carousel_interval = $('#carouselExampleIndicators').data('bs-interval');#}
+        {#const refresh_time = ((carousel_items + 1) * (carousel_interval));#}
+        {#setInterval(function () {#}
+        {#    location.reload();#}
+        {# }, refresh_time); #}
+        {#console.log(carousel_items);#}
+        {#console.log(carousel_interval);#}
+        {#console.log(carousel_items * carousel_interval, refresh_time - (carousel_items * carousel_interval));#}
+        {#console.log(refresh_time);#}
+{#                     $.ajax({#}
+{#                    url: "{% url 'main:sa_graph_ajax' %}?frozen=True",  // URL to the AJAX view#}
+{#                    method: "GET",#}
+{#                    success: function(response) {#}
+{#                        // Parse the labels and data from the response#}
+{#                        var labels = response.labels;#}
+{#                        var data = response.data;#}
+{#var ctx4 = document.getElementById("sa-graph").getContext("2d");#}
+{##}
+{# new Chart(ctx4, {#}
+{#            type: "bar",#}
+{#            data: {#}
+{#                labels: labels,#}
+{#                datasets: [{#}
+{#                    tension: 0,#}
+{#                    borderWidth: 0,#}
+{#                    pointRadius: 5,#}
+                    {#pointBackgroundColor: "rgba(255, 255, 255, .8)",#}
+{#                    pointBorderColor: "transparent",#}
+                    {#borderColor: "rgba(255, 255, 255, .8)",#}
+                    {#borderColor: "rgba(255, 255, 255, .8)",#}
+{#                    borderWidth: 4,#}
+{#                    backgroundColor: "transparent",#}
+{#                    fill: true,#}
+{#                    data: data,#}
+{#                    maxBarThickness: 6#}
+{##}
+{#                }],#}
+{#            },#}
+{#            options: {#}
+{#                responsive: true,#}
+{#                maintainAspectRatio: false,#}
+{#                plugins: {#}
+{#                    legend: {#}
+{#                        display: false,#}
+{#                    }#}
+{#                },#}
+{#                interaction: {#}
+{#                    intersect: false,#}
+{#                    mode: 'index',#}
+{#                },#}
+{#                scales: {#}
+{#                    y: {#}
+{#                        grid: {#}
+{#                            drawBorder: false,#}
+{#                            display: true,#}
+{#                            drawOnChartArea: true,#}
+{#                            drawTicks: false,#}
+{#                            borderDash: [5, 5],#}
+{#                            color: 'rgba(255, 255, 255, .2)'#}
+{#                        },#}
+{#                        ticks: {#}
+{#                            display: true,#}
+                            {#color: '#f8f9fa',#}
+{#                            padding: 10,#}
+{#                            stepSize: 1,#}
+{#                            font: {#}
+{#                                size: 14,#}
+{#                                weight: 300,#}
+{#                                style: 'normal',#}
+{#                                lineHeight: 2#}
+{#                            },#}
+{#                        }#}
+{#                    },#}
+{#                    x: {#}
+{#                        grid: {#}
+{#                            drawBorder: false,#}
+{#                            display: false,#}
+{#                            drawOnChartArea: false,#}
+{#                            drawTicks: false,#}
+{#                            borderDash: [5, 5]#}
+{#                        },#}
+{#                        ticks: {#}
+{#                            display: true,#}
+                            {#color: '#f8f9fa',#}
+{#                            padding: 10,#}
+{#                            maxTicksLimit: 32,#}
+{#                            font: {#}
+{#                                size: 10,#}
+{#                                weight: 300,#}
+{#                                style: 'normal',#}
+{#                                lineHeight: 2#}
+{#                            },#}
+{#                        }#}
+{#                    },#}
+{#                },#}
+{#            },#}
+{#        });#}
+{#                    },#}
+{#                    error: function(xhr, status, error) {#}
+{#                        console.error("Error fetching vote data:", error);#}
+{#                    }#}
+{#                });#}
+        });
+    </script>
+{% endblock %}
