@@ -17,18 +17,17 @@ from django.contrib import messages
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/4.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'no34m&qz($l29)y9dbay6t&@o2&hna56u)2uq!a1q@9oe4f_mr1ln98(*r)%&q2nug-#t8lt2#fev$#sln+)^t*j#v123=@+i!x)'
+SECRET_KEY = os.environ.get("SECRET_KEY")
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
+DEBUG = os.environ.get("DEBUG", False)
 
-ALLOWED_HOSTS = ["vote.bpj.srbiau.ac.ir"]
-CSRF_TRUSTED_ORIGINS = ['https://vote.bpj.srbiau.ac.ir']
+ALLOWED_HOSTS = os.environ.get("ALLOWED_HOSTS")  # ["vote.bpj.srbiau.ac.ir"]
+CSRF_TRUSTED_ORIGINS = os.environ.get("CSRF_TRUSTED_ORIGINS")  # ['https://vote.bpj.srbiau.ac.ir']
 
 # Application definition
 
@@ -104,21 +103,19 @@ AUTHENTICATION_BACKENDS = [
 
 WSGI_APPLICATION = 'bpjvote.wsgi.application'
 
-
 # Database
 # https://docs.djangoproject.com/en/4.2/ref/settings/#databases
 
 DATABASES = {
     "default": {
-        "ENGINE": "django_prometheus.db.backends.postgresql",
-        "NAME": "vote",
-        "USER": "vote",
-        "PASSWORD": "jZcoVDuRkdXdX17",
-        "HOST": "127.0.0.1",
-        "PORT": "5432",
+        "ENGINE": os.environ.get("DB_ENGINE"),
+        "NAME": os.environ.get("DB_NAME"),
+        "USER": os.environ.get("DB_USER"),
+        "PASSWORD": os.environ.get("DB_PASSWORD"),
+        "HOST": os.environ.get("DB_HOST"),
+        "PORT": os.environ.get("DB_PORT"),
     }
 }
-
 
 # Password validation
 # https://docs.djangoproject.com/en/4.2/ref/settings/#auth-password-validators
@@ -138,7 +135,6 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
-
 # Internationalization
 # https://docs.djangoproject.com/en/4.2/topics/i18n/
 
@@ -149,7 +145,6 @@ TIME_ZONE = 'Asia/Tehran'
 USE_I18N = False
 
 USE_TZ = False
-
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/4.2/howto/static-files/
@@ -164,11 +159,10 @@ MEDIA_URL = "media/"
 #
 CACHES = {
     "default": {
-        "BACKEND": "django_valkey.cache.ValkeyCache",
-        "LOCATION": "valkey://127.0.0.1:6379",
-        }
+        "BACKEND": os.environ.get("CACHE_BACKEND"),
+        "LOCATION": os.environ.get("CACHE_LOCATION"),
     }
-
+}
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
@@ -233,8 +227,6 @@ LOGGING = {
     },
 }
 
-
-
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 AUTH_USER_MODEL = 'main.user'
 
@@ -245,7 +237,7 @@ RECAPTCHA_REQUIRED_SCORE = 0.85
 TURNSTILE_SITEKEY = '0x4AAAAAAAxiHy_NJkcaI-wr'
 TURNSTILE_SECRET = '0x4AAAAAAAxiH1TYrp-Mvc8EE7O4uvtCxyE'
 TURNSTILE_DEFAULT_CONFIG = {
-    'theme': 'light',  # do not use data- prefix
+    'theme': 'light',  # do not use data-prefix
     'language': 'fa'
 }
 
@@ -279,16 +271,14 @@ THUMBNAIL_PADDING = True
 # THUMBNAIL_PRESERVE_FORMAT = True
 
 
-
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = 'mail.srbiau.ac.ir'  # Replace 'smtp.example.com' with your SMTP server hostname
-EMAIL_PORT = 587  # Replace '587' with your SMTP server port number
-EMAIL_HOST_USER = 'bpj@srbiau.ac.ir'  # Replace 'your_email@example.com' with your email address
-EMAIL_HOST_PASSWORD = 'BpjEmail@2024'  # Replace 'your_email_password' with your email password
+EMAIL_PORT = os.environ.get("EMAIL_PORT")  # Replace '587' with your SMTP server port number
+EMAIL_HOST_USER = os.environ.get("EMAIL_HOST_USER")  # Replace 'your_email@example.com' with your email address
+EMAIL_HOST_PASSWORD = os.environ.get("EMAIL_HOST_PASSWORD")  # Replace 'your_email_password' with your email password
 EMAIL_USE_TLS = False  # Set it to 'True' if your SMTP server uses TLS encryption
 EMAIL_NAME = 'سامانه انتخابات آنلاین انجمن های علمی باشگاه پژوهشگران جوان و نخبگان علوم و تحقیقات',
 SEND_EMAIL = False
-
 
 SMS_SETTINGS = {
     'SMS_APIKEY': "SJ3fSArCxdYIMzslMRTf0wJDFttz4XyIyPsoASvBR5I=",
@@ -301,7 +291,7 @@ SEND_SMS = True
 CACHALOT_UNCACHABLE_TABLES = frozenset(('django_migrations', 'vote_vote', 'vote_voter'))
 
 # Define the time range during which creation is disallowed
-NOVOTE_START_HOUR = 17
-NOVOTE_END_HOUR = 9
-FORCE_TIME = True
-VOTING_ENABLED = True
+NOVOTE_START_HOUR = os.environ.get("NOVOTE_START_HOUR")
+NOVOTE_END_HOUR = os.environ.get("NOVOTE_END_HOUR")
+FORCE_TIME = os.environ.get("FORCE_TIME")
+VOTING_ENABLED = os.environ.get("VOTING_ENABLED")
