@@ -31,7 +31,7 @@ INSTALLED_APPS = [
     "django.contrib.admin",
     "django.contrib.auth",
     "django.contrib.contenttypes",
-    "django.contrib.sessions",   # از qsessions استفاده نمی‌کنیم تا ساده بماند
+    "django.contrib.sessions",   # ساده و پایدار؛ qsessions لازم نداریم
     "django.contrib.messages",
     "django.contrib.staticfiles",
 
@@ -43,7 +43,7 @@ INSTALLED_APPS = [
     "cachalot",
     "sorl.thumbnail",
     "django_prometheus",
-    "crispy_forms",              # برای { % crispy % } و crispy_forms_tags
+    "crispy_forms",
 
     # local
     "main",
@@ -51,6 +51,12 @@ INSTALLED_APPS = [
 ]
 
 AUTH_USER_MODEL = "main.User"
+
+# Axes backend (برای رفع هشدار)
+AUTHENTICATION_BACKENDS = [
+    "axes.backends.AxesStandaloneBackend",
+    "django.contrib.auth.backends.ModelBackend",
+]
 
 # ------------------------------------------------------------------------------
 # Middleware
@@ -90,16 +96,15 @@ WSGI_APPLICATION = "bpjvote.wsgi.application"
 
 # ------------------------------------------------------------------------------
 # Database
-# - پیش‌فرض: SQLite (بدون وابستگی)
-# - اگر USE_POSTGRES=True در .env بود → PostgreSQL
+# - پیش‌فرض: SQLite (هیچ وابستگی اضافه‌ای ندارد)
+# - اگر USE_POSTGRES=True در .env → PostgreSQL فعال می‌شود
 # ------------------------------------------------------------------------------
 USE_POSTGRES = os.getenv("USE_POSTGRES", "False") == "True"
 
 if USE_POSTGRES:
     DATABASES = {
         "default": {
-            # توجه: backend ساده‌ی Django تا نیاز به psycopg و ارور 502 نداشته باشیم
-            "ENGINE": "django.db.backends.postgresql",
+            "ENGINE": "django.db.backends.postgresql",  # ساده؛ بدون backend پرومتئوس
             "NAME": os.getenv("POSTGRES_DB", "bpjvote"),
             "USER": os.getenv("POSTGRES_USER", "bpjvote"),
             "PASSWORD": os.getenv("POSTGRES_PASSWORD", ""),
@@ -136,7 +141,7 @@ MEDIA_ROOT = os.getenv("MEDIA_ROOT", str(BASE_DIR / "media"))
 
 # ------------------------------------------------------------------------------
 # Cache / Sessions / Ratelimit / Axes / Cachalot
-# - پیش‌فرض: بدون Redis (LocMemCache و Session در DB)
+# - پیش‌فرض: FileBasedCache (کش مشترک سازگار با ratelimit)
 # - اگر USE_REDIS=True → Redis فعال می‌شود
 # ------------------------------------------------------------------------------
 USE_REDIS = os.getenv("USE_REDIS", "False") == "True"
@@ -150,22 +155,24 @@ if USE_REDIS:
             "KEY_PREFIX": "bpjvote",
         }
     }
-    SESSION_ENGINE = "django.contrib.sessions.backends.cache"
-    SESSION_CACHE_ALIAS = "default"
-    CACHALOT_CACHE = "default"
 else:
     CACHES = {
         "default": {
-            "BACKEND": "django.core.cache.backends.locmem.LocMemCache",
-            "LOCATION": "bpjvote-locmem",
+            "BACKEND": "django.core.cache.backends.filebased.FileBasedCache",
+            "LOCATION": os.getenv("DJANGO_CACHE_DIR", "/var/cache/django"),
+            "OPTIONS": {"MAX_ENTRIES": 100000},
+            "TIMEOUT": 60 * 60,  # 1h
         }
     }
-    SESSION_ENGINE = "django.contrib.sessions.backends.db"
-    CACHALOT_CACHE = "default"
+
+# سشن‌ها را روی همان کش می‌گذاریم تا پایدار و سریع باشد
+SESSION_ENGINE = "django.contrib.sessions.backends.cache"
+SESSION_CACHE_ALIAS = "default"
 
 RATELIMIT_USE_CACHE = "default"
 AXES_CACHE = "default"
 CACHALOT_ENABLED = True
+CACHALOT_CACHE = "default"
 
 # ------------------------------------------------------------------------------
 # Messages
