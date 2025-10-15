@@ -1,15 +1,14 @@
 """
 Production settings for bpjvote (Django 4.2)
 """
-
 from pathlib import Path
 import os
 from dotenv import load_dotenv
 from django.contrib import messages
 
-# --------------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
 # Base
-# --------------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
 BASE_DIR = Path(__file__).resolve().parent.parent
 load_dotenv(BASE_DIR / ".env")  # read /srv/bpjvote/.env
 
@@ -23,18 +22,16 @@ ALLOWED_HOSTS = (
 CSRF_TRUSTED_ORIGINS = [
     *(os.getenv("CSRF_TRUSTED_ORIGINS", "").replace(" ", "").split(",")),
 ]
-CSRF_TRUSTED_ORIGINS = [o for o in CSRF_TRUSTED_ORIGINS if o]  # drop empties
+CSRF_TRUSTED_ORIGINS = [o for o in CSRF_TRUSTED_ORIGINS if o]
 
-# --------------------------------------------------------------------------------------
-# Applications
-# --------------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
+# Apps
+# ------------------------------------------------------------------------------
 INSTALLED_APPS = [
     "django.contrib.admin",
     "django.contrib.auth",
     "django.contrib.contenttypes",
-    # اگر پروژه عمداً از qsessions استفاده می‌کند، همین را نگه دار:
-    # "qsessions",
-    "django.contrib.sessions",
+    "django.contrib.sessions",   # از qsessions استفاده نمی‌کنیم تا ساده بماند
     "django.contrib.messages",
     "django.contrib.staticfiles",
 
@@ -46,18 +43,18 @@ INSTALLED_APPS = [
     "cachalot",
     "sorl.thumbnail",
     "django_prometheus",
-    "crispy_forms",
+    "crispy_forms",              # برای { % crispy % } و crispy_forms_tags
 
-    # local apps
+    # local
     "main",
     "vote",
 ]
 
 AUTH_USER_MODEL = "main.User"
 
-# --------------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
 # Middleware
-# --------------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
 MIDDLEWARE = [
     "django_prometheus.middleware.PrometheusBeforeMiddleware",
     "django.middleware.security.SecurityMiddleware",
@@ -91,32 +88,45 @@ TEMPLATES = [
 
 WSGI_APPLICATION = "bpjvote.wsgi.application"
 
-# --------------------------------------------------------------------------------------
-# Database (PostgreSQL)
-# --------------------------------------------------------------------------------------
-DATABASES = {
-    "default": {
-        "ENGINE": "django_prometheus.db.backends.postgresql",
-        "NAME": os.getenv("POSTGRES_DB", "bpjvote"),
-        "USER": os.getenv("POSTGRES_USER", "bpjvote"),
-        "PASSWORD": os.getenv("POSTGRES_PASSWORD", ""),
-        "HOST": os.getenv("POSTGRES_HOST", "127.0.0.1"),
-        "PORT": os.getenv("POSTGRES_PORT", "5432"),
-        "CONN_MAX_AGE": 60,
-    }
-}
+# ------------------------------------------------------------------------------
+# Database
+# - پیش‌فرض: SQLite (بدون وابستگی)
+# - اگر USE_POSTGRES=True در .env بود → PostgreSQL
+# ------------------------------------------------------------------------------
+USE_POSTGRES = os.getenv("USE_POSTGRES", "False") == "True"
 
-# --------------------------------------------------------------------------------------
-# Internationalization / TZ
-# --------------------------------------------------------------------------------------
+if USE_POSTGRES:
+    DATABASES = {
+        "default": {
+            # توجه: backend ساده‌ی Django تا نیاز به psycopg و ارور 502 نداشته باشیم
+            "ENGINE": "django.db.backends.postgresql",
+            "NAME": os.getenv("POSTGRES_DB", "bpjvote"),
+            "USER": os.getenv("POSTGRES_USER", "bpjvote"),
+            "PASSWORD": os.getenv("POSTGRES_PASSWORD", ""),
+            "HOST": os.getenv("POSTGRES_HOST", "127.0.0.1"),
+            "PORT": os.getenv("POSTGRES_PORT", "5432"),
+            "CONN_MAX_AGE": 60,
+        }
+    }
+else:
+    DATABASES = {
+        "default": {
+            "ENGINE": "django.db.backends.sqlite3",
+            "NAME": BASE_DIR / "db.sqlite3",
+        }
+    }
+
+# ------------------------------------------------------------------------------
+# I18N / TZ
+# ------------------------------------------------------------------------------
 LANGUAGE_CODE = "fa"
 TIME_ZONE = os.getenv("TIME_ZONE", "Asia/Tehran")
 USE_I18N = True
 USE_TZ = True
 
-# --------------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
 # Static & Media
-# --------------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
 STATIC_URL = "/static/"
 STATIC_ROOT = os.getenv("STATIC_ROOT", str(BASE_DIR / "static"))
 STATICFILES_DIRS = [p for p in [BASE_DIR / "assets"] if p.exists()]
@@ -124,28 +134,42 @@ STATICFILES_DIRS = [p for p in [BASE_DIR / "assets"] if p.exists()]
 MEDIA_URL = "/media/"
 MEDIA_ROOT = os.getenv("MEDIA_ROOT", str(BASE_DIR / "media"))
 
-# --------------------------------------------------------------------------------------
-# Caches (Redis) + Cachalot + Ratelimit + Axes
-# --------------------------------------------------------------------------------------
-CACHES = {
-    "default": {
-        "BACKEND": "django_redis.cache.RedisCache",
-        "LOCATION": os.getenv("REDIS_URL", "redis://127.0.0.1:6379/1"),
-        "OPTIONS": {"CLIENT_CLASS": "django_redis.client.DefaultClient"},
-        "KEY_PREFIX": "bpjvote",
+# ------------------------------------------------------------------------------
+# Cache / Sessions / Ratelimit / Axes / Cachalot
+# - پیش‌فرض: بدون Redis (LocMemCache و Session در DB)
+# - اگر USE_REDIS=True → Redis فعال می‌شود
+# ------------------------------------------------------------------------------
+USE_REDIS = os.getenv("USE_REDIS", "False") == "True"
+
+if USE_REDIS:
+    CACHES = {
+        "default": {
+            "BACKEND": "django_redis.cache.RedisCache",
+            "LOCATION": os.getenv("REDIS_URL", "redis://127.0.0.1:6379/1"),
+            "OPTIONS": {"CLIENT_CLASS": "django_redis.client.DefaultClient"},
+            "KEY_PREFIX": "bpjvote",
+        }
     }
-}
-SESSION_ENGINE = "django.contrib.sessions.backends.cache"
-SESSION_CACHE_ALIAS = "default"
+    SESSION_ENGINE = "django.contrib.sessions.backends.cache"
+    SESSION_CACHE_ALIAS = "default"
+    CACHALOT_CACHE = "default"
+else:
+    CACHES = {
+        "default": {
+            "BACKEND": "django.core.cache.backends.locmem.LocMemCache",
+            "LOCATION": "bpjvote-locmem",
+        }
+    }
+    SESSION_ENGINE = "django.contrib.sessions.backends.db"
+    CACHALOT_CACHE = "default"
 
 RATELIMIT_USE_CACHE = "default"
 AXES_CACHE = "default"
 CACHALOT_ENABLED = True
-CACHALOT_CACHE = "default"
 
-# --------------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
 # Messages
-# --------------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
 MESSAGE_TAGS = {
     messages.DEBUG: "debug",
     messages.INFO: "info",
@@ -154,16 +178,16 @@ MESSAGE_TAGS = {
     messages.ERROR: "danger",
 }
 
-# --------------------------------------------------------------------------------------
-# Security (adjust if you add HTTPS)
-# --------------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
+# Security
+# ------------------------------------------------------------------------------
 SECURE_BROWSER_XSS_PROTECTION = True
 SECURE_CONTENT_TYPE_NOSNIFF = True
 X_FRAME_OPTIONS = "DENY"
 
-# --------------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
 # Logging
-# --------------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
 LOG_DIR = BASE_DIR / "logs"
 os.makedirs(LOG_DIR, exist_ok=True)
 LOGGING = {
@@ -186,9 +210,9 @@ LOGGING = {
     "root": {"handlers": ["console", "error_file"], "level": "INFO" if not DEBUG else "DEBUG"},
 }
 
-# --------------------------------------------------------------------------------------
-# Axes (login protection) + Turnstile (Cloudflare)
-# --------------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
+# Axes / Turnstile
+# ------------------------------------------------------------------------------
 AXES_ENABLED = True
 AXES_FAILURE_LIMIT = int(os.getenv("AXES_FAILURE_LIMIT", "5"))
 AXES_LOCKOUT_PARAMETERS = ["username"]
@@ -196,27 +220,27 @@ AXES_LOCKOUT_PARAMETERS = ["username"]
 TURNSTILE_SITE_KEY = os.getenv("TURNSTILE_SITE_KEY", "")
 TURNSTILE_SECRET_KEY = os.getenv("TURNSTILE_SECRET_KEY", "")
 
-# --------------------------------------------------------------------------------------
-# Voting time flags (make 24/7 open now)
-# --------------------------------------------------------------------------------------
-# با این فلگ کل محدودیت زمانی غیرفعال می‌شود:
+# ------------------------------------------------------------------------------
+# Voting window (الان 24/7 باز است)
+# ------------------------------------------------------------------------------
 NOVOTE_ALWAYS_OPEN = os.getenv("NOVOTE_ALWAYS_OPEN", "True") == "True"
-
-# در صورتی که خواستی محدودیت زمانی را فعال کنی:
 FORCE_TIME = os.getenv("FORCE_TIME", "False") == "True"
 NOVOTE_START_HOUR = int(os.getenv("NOVOTE_START_HOUR", "22"))  # 22:00
-NOVOTE_END_HOUR = int(os.getenv("NOVOTE_END_HOUR", "6"))       # 06:00
+NOVOTE_END_HOUR   = int(os.getenv("NOVOTE_END_HOUR", "6"))     # 06:00
 
-# --------------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
 # Feature flags used in signals.py
-# --------------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
 SEND_EMAIL = os.getenv("SEND_EMAIL", "False") == "True"
-SEND_SMS = os.getenv("SEND_SMS", "False") == "True"
+SEND_SMS   = os.getenv("SEND_SMS", "False") == "True"
 
-# --------------------------------------------------------------------------------------
-# Email (only used if SEND_EMAIL=True)
-# --------------------------------------------------------------------------------------
-EMAIL_BACKEND = os.getenv("EMAIL_BACKEND", "django.core.mail.backends.console.EmailBackend" if DEBUG else "django.core.mail.backends.smtp.EmailBackend")
+# ------------------------------------------------------------------------------
+# Email (when SEND_EMAIL=True)
+# ------------------------------------------------------------------------------
+EMAIL_BACKEND = os.getenv(
+    "EMAIL_BACKEND",
+    "django.core.mail.backends.console.EmailBackend" if DEBUG else "django.core.mail.backends.smtp.EmailBackend",
+)
 EMAIL_HOST = os.getenv("EMAIL_HOST", "")
 EMAIL_PORT = int(os.getenv("EMAIL_PORT", "587" if os.getenv("EMAIL_HOST") else "25"))
 EMAIL_HOST_USER = os.getenv("EMAIL_HOST_USER", "")
@@ -224,7 +248,7 @@ EMAIL_HOST_PASSWORD = os.getenv("EMAIL_HOST_PASSWORD", "")
 EMAIL_USE_TLS = os.getenv("EMAIL_USE_TLS", "True") == "True"
 DEFAULT_FROM_EMAIL = os.getenv("DEFAULT_FROM_EMAIL", "noreply@example.com")
 
-# --------------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
 # Prometheus
-# --------------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
 PROMETHEUS_EXPORT_MIGRATIONS = False
