@@ -1,7 +1,4 @@
-FROM ubuntu:latest
-LABEL authors="mohammad"
-
-ENTRYPOINT ["top", "-b"]FROM python:3.12-slim
+FROM python:3.12-slim
 
 # Install necessary system packages for database tools and health checks
 RUN apt-get update && apt-get install -y --no-install-recommends \
@@ -14,10 +11,11 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 WORKDIR /app
 
 # Copy requirements first to leverage Docker caching
-COPY requirements.txt requirements-lock.txt* ./
+# Copy requirements files (including the lock)
+COPY requirements-lock.txt ./ 
 
-# Install dependencies
-RUN pip install --no-cache-dir -r requirements.txt
+# Install dependencies from the lock file
+RUN pip3 install --no-cache-dir -r requirements-lock.txt
 
 # Copy the entire application code
 COPY . .

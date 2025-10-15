@@ -26,8 +26,8 @@ SECRET_KEY = os.environ.get("SECRET_KEY")
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.environ.get("DEBUG", False)
 
-ALLOWED_HOSTS = os.environ.get("ALLOWED_HOSTS")  # ["vote.bpj.srbiau.ac.ir"]
-CSRF_TRUSTED_ORIGINS = os.environ.get("CSRF_TRUSTED_ORIGINS")  # ['https://vote.bpj.srbiau.ac.ir']
+ALLOWED_HOSTS = ["localhost", "188.245.198.200"] #os.environ.get("ALLOWED_HOSTS")  # ["vote.bpj.srbiau.ac.ir"]
+CSRF_TRUSTED_ORIGINS = ["http://localhost", "http://188.245.198.200:8000"] # os.environ.get("CSRF_TRUSTED_ORIGINS")  # ['https://vote.bpj.srbiau.ac.ir']
 
 # Application definition
 
@@ -45,7 +45,7 @@ INSTALLED_APPS = [
     'django_ratelimit',
     # 'django_recaptcha',
     'turnstile',
-    # "debug_toolbar",
+     "debug_toolbar",
     'cachalot',
     'sorl.thumbnail',
     'django_prometheus',
@@ -116,7 +116,7 @@ DATABASES = {
         "PORT": os.environ.get("DB_PORT"),
     }
 }
-
+print(DATABASES)
 # Password validation
 # https://docs.djangoproject.com/en/4.2/ref/settings/#auth-password-validators
 
@@ -150,17 +150,22 @@ USE_TZ = False
 # https://docs.djangoproject.com/en/4.2/howto/static-files/
 
 STATIC_URL = 'static/'
-STATIC_ROOT = '/home/vote/projects/bpjvote/static/'
-MEDIA_ROOT = "/home/vote/projects/bpjvote/media/"
+STATIC_ROOT = './vote/static/'
+MEDIA_ROOT ="./media/"
 MEDIA_URL = "media/"
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field
 #
+
 CACHES = {
     "default": {
-        "BACKEND": os.environ.get("CACHE_BACKEND"),
-        "LOCATION": os.environ.get("CACHE_LOCATION"),
+        "BACKEND": os.getenv("CACHE_BACKEND", "django_redis.cache.RedisCache"),
+        "LOCATION": os.getenv("CACHE_LOCATION", "redis://cache:6379/0"),
+        "OPTIONS": {
+            "CLIENT_CLASS": "django_redis.client.DefaultClient",
+            "PASSWORD": "ahsljkdff203849@#$safhjkld",
+        },
     }
 }
 
