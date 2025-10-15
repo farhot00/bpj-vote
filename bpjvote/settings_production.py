@@ -31,7 +31,7 @@ INSTALLED_APPS = [
     "django.contrib.admin",
     "django.contrib.auth",
     "django.contrib.contenttypes",
-    "django.contrib.sessions",   # ساده و پایدار؛ qsessions لازم نداریم
+    "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
 
@@ -44,6 +44,7 @@ INSTALLED_APPS = [
     "sorl.thumbnail",
     "django_prometheus",
     "crispy_forms",
+    "crispy_bootstrap4",  # ← تم Bootstrap 4 برای crispy
 
     # local
     "main",
@@ -52,7 +53,7 @@ INSTALLED_APPS = [
 
 AUTH_USER_MODEL = "main.User"
 
-# Axes backend (برای رفع هشدار)
+# Axes backend (رفع هشدار)
 AUTHENTICATION_BACKENDS = [
     "axes.backends.AxesStandaloneBackend",
     "django.contrib.auth.backends.ModelBackend",
@@ -96,8 +97,8 @@ WSGI_APPLICATION = "bpjvote.wsgi.application"
 
 # ------------------------------------------------------------------------------
 # Database
-# - پیش‌فرض: SQLite (هیچ وابستگی اضافه‌ای ندارد)
-# - اگر USE_POSTGRES=True در .env → PostgreSQL فعال می‌شود
+# - پیش‌فرض: SQLite (بدون وابستگی اضافه)
+# - اگر USE_POSTGRES=True در .env → PostgreSQL
 # ------------------------------------------------------------------------------
 USE_POSTGRES = os.getenv("USE_POSTGRES", "False") == "True"
 
@@ -142,7 +143,7 @@ MEDIA_ROOT = os.getenv("MEDIA_ROOT", str(BASE_DIR / "media"))
 # ------------------------------------------------------------------------------
 # Cache / Sessions / Ratelimit / Axes / Cachalot
 # - پیش‌فرض: FileBasedCache (کش مشترک سازگار با ratelimit)
-# - اگر USE_REDIS=True → Redis فعال می‌شود
+# - اگر USE_REDIS=True → Redis
 # ------------------------------------------------------------------------------
 USE_REDIS = os.getenv("USE_REDIS", "False") == "True"
 
@@ -165,7 +166,6 @@ else:
         }
     }
 
-# سشن‌ها را روی همان کش می‌گذاریم تا پایدار و سریع باشد
 SESSION_ENGINE = "django.contrib.sessions.backends.cache"
 SESSION_CACHE_ALIAS = "default"
 
@@ -173,6 +173,12 @@ RATELIMIT_USE_CACHE = "default"
 AXES_CACHE = "default"
 CACHALOT_ENABLED = True
 CACHALOT_CACHE = "default"
+
+# ------------------------------------------------------------------------------
+# Crispy Forms
+# ------------------------------------------------------------------------------
+CRISPY_ALLOWED_TEMPLATE_PACKS = ("bootstrap", "bootstrap4", "bootstrap5")
+CRISPY_TEMPLATE_PACK = os.getenv("CRISPY_TEMPLATE_PACK", "bootstrap4")
 
 # ------------------------------------------------------------------------------
 # Messages
@@ -257,5 +263,6 @@ DEFAULT_FROM_EMAIL = os.getenv("DEFAULT_FROM_EMAIL", "noreply@example.com")
 
 # ------------------------------------------------------------------------------
 # Prometheus
+#farhad
 # ------------------------------------------------------------------------------
 PROMETHEUS_EXPORT_MIGRATIONS = False
