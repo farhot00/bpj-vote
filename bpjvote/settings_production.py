@@ -1,46 +1,65 @@
-cat > bpjvote/settings_production.py << 'PY'
 """
-Django settings for bpjvote project (production-friendly).
+Production settings for bpjvote (Django 4.2)
 """
-import os
+
 from pathlib import Path
+import os
 from dotenv import load_dotenv
 from django.contrib import messages
 
+# --------------------------------------------------------------------------------------
+# Base
+# --------------------------------------------------------------------------------------
 BASE_DIR = Path(__file__).resolve().parent.parent
-load_dotenv(BASE_DIR / ".env")
+load_dotenv(BASE_DIR / ".env")  # read /srv/bpjvote/.env
 
-SECRET_KEY = os.getenv("SECRET_KEY", "change-me-in-env")
+SECRET_KEY = os.getenv("SECRET_KEY", "change-me")
 DEBUG = os.getenv("DEBUG", "False") == "True"
 
-_allowed = os.getenv("ALLOWED_HOSTS", "")
-ALLOWED_HOSTS = [h.strip() for h in _allowed.split(",") if h.strip()] or ["127.0.0.1", "localhost"]
+ALLOWED_HOSTS = (
+    os.getenv("ALLOWED_HOSTS", "127.0.0.1,localhost").replace(" ", "").split(",")
+)
 
+CSRF_TRUSTED_ORIGINS = [
+    *(os.getenv("CSRF_TRUSTED_ORIGINS", "").replace(" ", "").split(",")),
+]
+CSRF_TRUSTED_ORIGINS = [o for o in CSRF_TRUSTED_ORIGINS if o]  # drop empties
+
+# --------------------------------------------------------------------------------------
+# Applications
+# --------------------------------------------------------------------------------------
 INSTALLED_APPS = [
     "django.contrib.admin",
     "django.contrib.auth",
     "django.contrib.contenttypes",
-    # "django.contrib.sessions",
-    "qsessions",
+    # اگر پروژه عمداً از qsessions استفاده می‌کند، همین را نگه دار:
+    # "qsessions",
+    "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
 
+    # third-party
     "auditlog",
     "axes",
     "django_ratelimit",
-    # "django_recaptcha",
     "turnstile",
     "cachalot",
     "sorl.thumbnail",
     "django_prometheus",
+    "crispy_forms",
 
+    # local apps
     "main",
     "vote",
 ]
 
+AUTH_USER_MODEL = "main.User"
+
+# --------------------------------------------------------------------------------------
+# Middleware
+# --------------------------------------------------------------------------------------
 MIDDLEWARE = [
     "django_prometheus.middleware.PrometheusBeforeMiddleware",
-
     "django.middleware.security.SecurityMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
@@ -48,9 +67,7 @@ MIDDLEWARE = [
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
-
     "axes.middleware.AxesMiddleware",
-
     "django_prometheus.middleware.PrometheusAfterMiddleware",
 ]
 
@@ -74,56 +91,61 @@ TEMPLATES = [
 
 WSGI_APPLICATION = "bpjvote.wsgi.application"
 
-# Database: شروع سریع با SQLite (بعداً اگر خواستی Postgres می‌ذاریم)
+# --------------------------------------------------------------------------------------
+# Database (PostgreSQL)
+# --------------------------------------------------------------------------------------
 DATABASES = {
-    "default": {"ENGINE": "django.db.backends.sqlite3", "NAME": BASE_DIR / "db.sqlite3"}
+    "default": {
+        "ENGINE": "django_prometheus.db.backends.postgresql",
+        "NAME": os.getenv("POSTGRES_DB", "bpjvote"),
+        "USER": os.getenv("POSTGRES_USER", "bpjvote"),
+        "PASSWORD": os.getenv("POSTGRES_PASSWORD", ""),
+        "HOST": os.getenv("POSTGRES_HOST", "127.0.0.1"),
+        "PORT": os.getenv("POSTGRES_PORT", "5432"),
+        "CONN_MAX_AGE": 60,
+    }
 }
 
-# کاربر سفارشی شما
-AUTH_USER_MODEL = "main.User"
-
-# بک‌اندهای احراز هویت (Axes + پیش‌فرض جنگو)
-AUTHENTICATION_BACKENDS = [
-    "axes.backends.AxesStandaloneBackend",
-    "django.contrib.auth.backends.ModelBackend",
-]
-
-AUTH_PASSWORD_VALIDATORS = [
-    {"NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator"},
-    {"NAME": "django.contrib.auth.password_validation.MinimumLengthValidator"},
-    {"NAME": "django.contrib.auth.password_validation.CommonPasswordValidator"},
-    {"NAME": "django.contrib.auth.password_validation.NumericPasswordValidator"},
-]
-
-LANGUAGE_CODE = "en-us"
-TIME_ZONE = "UTC"
+# --------------------------------------------------------------------------------------
+# Internationalization / TZ
+# --------------------------------------------------------------------------------------
+LANGUAGE_CODE = "fa"
+TIME_ZONE = os.getenv("TIME_ZONE", "Asia/Tehran")
 USE_I18N = True
 USE_TZ = True
 
+# --------------------------------------------------------------------------------------
+# Static & Media
+# --------------------------------------------------------------------------------------
 STATIC_URL = "/static/"
-STATIC_ROOT = BASE_DIR / "static"
+STATIC_ROOT = os.getenv("STATIC_ROOT", str(BASE_DIR / "static"))
+STATICFILES_DIRS = [p for p in [BASE_DIR / "assets"] if p.exists()]
+
 MEDIA_URL = "/media/"
-MEDIA_ROOT = BASE_DIR / "media"
-DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
+MEDIA_ROOT = os.getenv("MEDIA_ROOT", str(BASE_DIR / "media"))
 
-# Sessions via qsessions
-SESSION_ENGINE = "qsessions.backends.cached_db"
-SESSION_COOKIE_AGE = 60 * 60 * 24 * 7
-
-# Cache: Redis (سازگار با ratelimit/axes/cachalot)
+# --------------------------------------------------------------------------------------
+# Caches (Redis) + Cachalot + Ratelimit + Axes
+# --------------------------------------------------------------------------------------
 CACHES = {
     "default": {
         "BACKEND": "django_redis.cache.RedisCache",
-        "LOCATION": "redis://127.0.0.1:6379/1",
+        "LOCATION": os.getenv("REDIS_URL", "redis://127.0.0.1:6379/1"),
         "OPTIONS": {"CLIENT_CLASS": "django_redis.client.DefaultClient"},
         "KEY_PREFIX": "bpjvote",
     }
 }
+SESSION_ENGINE = "django.contrib.sessions.backends.cache"
+SESSION_CACHE_ALIAS = "default"
+
 RATELIMIT_USE_CACHE = "default"
 AXES_CACHE = "default"
 CACHALOT_ENABLED = True
 CACHALOT_CACHE = "default"
 
+# --------------------------------------------------------------------------------------
+# Messages
+# --------------------------------------------------------------------------------------
 MESSAGE_TAGS = {
     messages.DEBUG: "debug",
     messages.INFO: "info",
@@ -132,6 +154,16 @@ MESSAGE_TAGS = {
     messages.ERROR: "danger",
 }
 
+# --------------------------------------------------------------------------------------
+# Security (adjust if you add HTTPS)
+# --------------------------------------------------------------------------------------
+SECURE_BROWSER_XSS_PROTECTION = True
+SECURE_CONTENT_TYPE_NOSNIFF = True
+X_FRAME_OPTIONS = "DENY"
+
+# --------------------------------------------------------------------------------------
+# Logging
+# --------------------------------------------------------------------------------------
 LOG_DIR = BASE_DIR / "logs"
 os.makedirs(LOG_DIR, exist_ok=True)
 LOGGING = {
@@ -154,10 +186,45 @@ LOGGING = {
     "root": {"handlers": ["console", "error_file"], "level": "INFO" if not DEBUG else "DEBUG"},
 }
 
+# --------------------------------------------------------------------------------------
+# Axes (login protection) + Turnstile (Cloudflare)
+# --------------------------------------------------------------------------------------
 AXES_ENABLED = True
 AXES_FAILURE_LIMIT = int(os.getenv("AXES_FAILURE_LIMIT", "5"))
 AXES_LOCKOUT_PARAMETERS = ["username"]
 
 TURNSTILE_SITE_KEY = os.getenv("TURNSTILE_SITE_KEY", "")
 TURNSTILE_SECRET_KEY = os.getenv("TURNSTILE_SECRET_KEY", "")
-PY
+
+# --------------------------------------------------------------------------------------
+# Voting time flags (make 24/7 open now)
+# --------------------------------------------------------------------------------------
+# با این فلگ کل محدودیت زمانی غیرفعال می‌شود:
+NOVOTE_ALWAYS_OPEN = os.getenv("NOVOTE_ALWAYS_OPEN", "True") == "True"
+
+# در صورتی که خواستی محدودیت زمانی را فعال کنی:
+FORCE_TIME = os.getenv("FORCE_TIME", "False") == "True"
+NOVOTE_START_HOUR = int(os.getenv("NOVOTE_START_HOUR", "22"))  # 22:00
+NOVOTE_END_HOUR = int(os.getenv("NOVOTE_END_HOUR", "6"))       # 06:00
+
+# --------------------------------------------------------------------------------------
+# Feature flags used in signals.py
+# --------------------------------------------------------------------------------------
+SEND_EMAIL = os.getenv("SEND_EMAIL", "False") == "True"
+SEND_SMS = os.getenv("SEND_SMS", "False") == "True"
+
+# --------------------------------------------------------------------------------------
+# Email (only used if SEND_EMAIL=True)
+# --------------------------------------------------------------------------------------
+EMAIL_BACKEND = os.getenv("EMAIL_BACKEND", "django.core.mail.backends.console.EmailBackend" if DEBUG else "django.core.mail.backends.smtp.EmailBackend")
+EMAIL_HOST = os.getenv("EMAIL_HOST", "")
+EMAIL_PORT = int(os.getenv("EMAIL_PORT", "587" if os.getenv("EMAIL_HOST") else "25"))
+EMAIL_HOST_USER = os.getenv("EMAIL_HOST_USER", "")
+EMAIL_HOST_PASSWORD = os.getenv("EMAIL_HOST_PASSWORD", "")
+EMAIL_USE_TLS = os.getenv("EMAIL_USE_TLS", "True") == "True"
+DEFAULT_FROM_EMAIL = os.getenv("DEFAULT_FROM_EMAIL", "noreply@example.com")
+
+# --------------------------------------------------------------------------------------
+# Prometheus
+# --------------------------------------------------------------------------------------
+PROMETHEUS_EXPORT_MIGRATIONS = False
